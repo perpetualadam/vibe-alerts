@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ChannelSettings, {
   isAnyChannelConfiguredFromCatalog,
 } from '@/components/dashboard/ChannelSettings';
+import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
 
 function StatusBadge({ active }) {
   return (
@@ -155,21 +156,6 @@ function formatRelativeTime(iso) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-async function signTestPayload(secret, body) {
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(`${timestamp}.${body}`));
-  const hex = Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, '0')).join('');
-  return { timestamp, signature: `sha256=${hex}` };
-}
-
 export default function DashboardPage() {
   const [data, setData] = useState(null);
   const [plugins, setPlugins] = useState([]);
@@ -247,31 +233,47 @@ export default function DashboardPage() {
     try {
       const credRes = await fetch('/api/dashboard/signing-credentials');
       if (!credRes.ok) throw new Error('Could not get signing credentials');
-      const { webhook_secret } = await credRes.json();
+      const { api_key } = await credRes.json();
 
       const payload = { Name: 'John Doe', Message: 'System Test Working!' };
       const body = JSON.stringify(payload);
-      const { timestamp, signature } = await signTestPayload(webhook_secret, body);
 
       const res = await fetch(`/api/v1/webhook/${data.profile.webhook_token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-VibeAlerts-Signature': signature,
-          'X-VibeAlerts-Timestamp': timestamp,
+          'X-VibeAlerts-Key': api_key,
         },
         body,
       });
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Test failed');
+      if (!res.ok) {
+        throw new Error(result.error || `Test failed (HTTP ${res.status})`);
+      }
 
-      showToast('Test alert sent to all enabled plugins!', 'success');
+      showToast('Test alert sent! Check Telegram and Notification History below.', 'success');
       fetchDashboard();
     } catch (err) {
       showToast(err.message || 'Test alert failed', 'error');
     } finally {
       setTesting(false);
+    }
+  };
+
+  const revealApiKey = async () => {
+    if (apiKey) {
+      setShowApiKey((v) => !v);
+      return;
+    }
+    try {
+      const credRes = await fetch('/api/dashboard/signing-credentials');
+      if (!credRes.ok) throw new Error('Could not load API key');
+      const { api_key } = await credRes.json();
+      setApiKey(api_key);
+      setShowApiKey(true);
+    } catch {
+      showToast('Could not load API key', 'error');
     }
   };
 
@@ -373,7 +375,25 @@ export default function DashboardPage() {
               {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
+          <div className="flex items-center gap-3 pt-2">
+            <span className="text-sm text-vibe-muted">API Key:</span>
+            <code className="flex-1 bg-black/40 rounded-lg px-3 py-2 text-sm font-mono break-all">
+              {showApiKey && apiKey ? apiKey : '••••••••••••••••'}
+            </code>
+            <button
+              type="button"
+              onClick={revealApiKey}
+              className="text-xs text-vibe-muted hover:text-white transition-colors whitespace-nowrap"
+            >
+              {showApiKey ? 'Hide' : 'Reveal'}
+            </button>
+          </div>
         </section>
+
+        <PlatformIntegrations
+          webhookToken={data?.profile?.webhook_token}
+          apiKey={showApiKey ? apiKey : null}
+        />
 
         <ChannelSettings
           plugins={plugins}

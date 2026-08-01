@@ -1,0 +1,40 @@
+{% comment %}
+  VibeAlerts Shopify contact form snippet
+  Add to theme: sections/contact-form.liquid or create custom section
+  Set webhook URL and API key in theme settings or replace placeholders below
+{% endcomment %}
+
+<script>
+  (function () {
+    const WEBHOOK_URL = '{{ section.settings.vibealerts_webhook_url | default: "YOUR_WEBHOOK_URL" }}';
+    const API_KEY = '{{ section.settings.vibealerts_api_key | default: "YOUR_API_KEY" }}';
+
+    document.addEventListener('submit', function (e) {
+      const form = e.target;
+      if (!form || form.tagName !== 'FORM') return;
+      if (!form.classList.contains('contact-form') && form.id !== 'contact_form') return;
+
+      e.preventDefault();
+      const formData = new FormData(form);
+      const payload = { _platform: 'shopify', shop_domain: '{{ shop.permanent_domain }}' };
+      formData.forEach(function (value, key) {
+        payload[key] = value;
+      });
+
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-VibeAlerts-Platform': 'shopify',
+          'X-VibeAlerts-Key': API_KEY,
+        },
+        body: JSON.stringify(payload),
+      }).then(function () {
+        if (form.querySelector('[type=submit]')) {
+          alert('Message sent! We will get back to you soon.');
+        }
+        form.reset();
+      });
+    });
+  })();
+</script>

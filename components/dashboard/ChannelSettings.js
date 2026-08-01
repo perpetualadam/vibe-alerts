@@ -37,6 +37,7 @@ export default function ChannelSettings({
 
   const isPluginConfigured = (plugin) => {
     const entry = channelConfigs?.[plugin.id];
+    if (!entry?.enabled) return false;
     if (!entry?.config) return false;
     return plugin.configSchema.every((field) => {
       if (!field.required) return true;
