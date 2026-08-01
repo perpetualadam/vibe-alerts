@@ -84,6 +84,7 @@ If URI Path starts with /api/ → Cache eligibility: Bypass
 | 27 | Stripe events | `checkout.session.completed`, `checkout.session.async_payment_failed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` |
 | 28 | Customer Portal | Enable in Stripe Dashboard → Settings → Billing → Customer portal |
 | 29 | Test end-to-end | Sign up → **Subscribe** in dashboard → Send Test Alert |
+| 30 | **Stripe website compliance** | Public pages live: `/pricing`, `/contact`, `/terms`, `/privacy`, `/refunds` with support email in footer |
 
 ### Phase 6 — SEO / AEO / LLMO verification
 
@@ -148,6 +149,11 @@ Website forms ──→ Cloudflare ──→ /api/v1/webhook/{token}  (must bypa
 | `/robots.txt` | Crawl rules (blocks `/dashboard`, `/login`, `/api/`) |
 | `/llms.txt` | LLMO — AI crawler product summary |
 | `/llms-full.txt` | Extended machine-readable reference |
+| `/pricing` | Subscription pricing (Stripe activation) |
+| `/contact` | Customer support contact details |
+| `/terms` | Terms of Service |
+| `/privacy` | Privacy Policy |
+| `/refunds` | Refund, dispute, and cancellation policy |
 | `/opengraph-image` | Dynamic OG image for social sharing |
 | JSON-LD on homepage | Organization, WebSite, SoftwareApplication, FAQPage, HowTo |
 

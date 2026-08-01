@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import JsonLd from '@/components/marketing/JsonLd';
+import MarketingShell from '@/components/marketing/MarketingShell';
 import { buildHomePageSchemas, getMarketingFaqs, getHowToSteps } from '@/lib/seo/jsonld';
 import { SITE } from '@/lib/seo/site';
+import { getSubscriptionPriceLabel } from '@/lib/legal/site';
 
 const features = [
   {
@@ -29,32 +31,13 @@ const features = [
 export default function HomePage() {
   const faqs = getMarketingFaqs();
   const howTo = getHowToSteps();
+  const priceLabel = getSubscriptionPriceLabel();
 
   return (
     <>
       <JsonLd data={buildHomePageSchemas()} />
 
-      <header className="border-b border-vibe-border">
-        <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
-          <p className="font-bold text-lg">{SITE.name}</p>
-          <nav aria-label="Primary">
-            <Link
-              href="/login"
-              className="text-sm text-vibe-muted hover:text-white transition-colors mr-4"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-sm px-4 py-2 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white font-medium transition-colors"
-            >
-              Get started
-            </Link>
-          </nav>
-        </div>
-      </header>
-
-      <main>
+      <MarketingShell>
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-6 py-20 text-center space-y-6" aria-labelledby="hero-heading">
           <p className="text-vibe-accent text-sm font-medium tracking-widest uppercase">
@@ -63,15 +46,19 @@ export default function HomePage() {
           <h1 id="hero-heading" className="text-4xl md:text-5xl font-bold tracking-tight max-w-3xl mx-auto">
             Send website form submissions to Telegram instantly
           </h1>
-          <p className="text-vibe-muted text-lg max-w-2xl mx-auto">
-            {SITE.description}
+          <p className="text-vibe-muted text-lg max-w-2xl mx-auto">{SITE.description}</p>
+          <p className="text-sm text-vibe-muted">
+            Subscription from {priceLabel}.{' '}
+            <Link href="/pricing" className="text-vibe-accent hover:underline">
+              View pricing
+            </Link>
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link
               href="/login"
               className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white font-medium transition-colors"
             >
-              Start free trial
+              Get started
             </Link>
             <a
               href="#how-it-works"
@@ -147,7 +134,9 @@ export default function HomePage() {
         {/* CTA */}
         <section className="max-w-5xl mx-auto px-6 py-16 text-center">
           <h2 className="text-2xl font-bold mb-3">Ready to get form alerts on Telegram?</h2>
-          <p className="text-vibe-muted mb-6">Set up in minutes. No credit card required to explore.</p>
+          <p className="text-vibe-muted mb-6">
+            Create an account, subscribe from your dashboard, and connect your first form in minutes.
+          </p>
           <Link
             href="/login"
             className="inline-flex items-center px-6 py-3 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white font-medium transition-colors"
@@ -155,11 +144,7 @@ export default function HomePage() {
             Create your account
           </Link>
         </section>
-      </main>
-
-      <footer className="border-t border-vibe-border py-8 text-center text-sm text-vibe-muted">
-        <p>© {new Date().getFullYear()} {SITE.name}. Website-agnostic form webhook alerts.</p>
-      </footer>
+      </MarketingShell>
     </>
   );
 }

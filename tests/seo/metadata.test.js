@@ -23,11 +23,16 @@ describe('SEO metadata', () => {
     expect(meta.alternates.canonical).toBe('https://vibe-alerts.com/dashboard');
   });
 
-  it('builds sitemap with homepage entry', () => {
+  it('builds sitemap with public marketing and legal pages', () => {
     const entries = buildSitemapEntries();
-    expect(entries).toHaveLength(1);
-    expect(entries[0].url).toBe('https://vibe-alerts.com/');
-    expect(entries[0].priority).toBe(1);
+    expect(entries.length).toBeGreaterThanOrEqual(6);
+    const urls = entries.map((entry) => entry.url);
+    expect(urls).toContain('https://vibe-alerts.com/');
+    expect(urls).toContain('https://vibe-alerts.com/pricing');
+    expect(urls).toContain('https://vibe-alerts.com/contact');
+    expect(urls).toContain('https://vibe-alerts.com/terms');
+    expect(urls).toContain('https://vibe-alerts.com/privacy');
+    expect(urls).toContain('https://vibe-alerts.com/refunds');
   });
 
   it('builds robots.txt config blocking private routes', () => {

@@ -31,10 +31,12 @@ describe('AEO JSON-LD schemas', () => {
     expect(schema.step[0].position).toBe(1);
   });
 
-  it('includes organization with logo URL', () => {
+  it('includes organization with logo URL and support contact', () => {
     const org = buildOrganizationSchema();
     expect(org['@type']).toBe('Organization');
     expect(org.logo).toBe('https://vibe-alerts.com/opengraph-image');
+    expect(org.contactPoint.email).toContain('@');
+    expect(org.contactPoint.url).toBe('https://vibe-alerts.com/contact');
   });
 
   it('builds homepage schema graph with FAQ and HowTo', () => {
