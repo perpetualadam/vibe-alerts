@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -65,12 +66,22 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm text-vibe-muted mb-1.5">Password</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="password" className="block text-sm text-vibe-muted">Password</label>
+              {mode === 'signin' && (
+                <Link
+                  href="/login/forgot-password"
+                  className="text-xs text-vibe-accent hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              )}
+            </div>
             <input
               id="password"
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-black/40 border border-vibe-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-vibe-accent/50"

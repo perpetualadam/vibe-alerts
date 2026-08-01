@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Required for Supabase auth cookie handling on Vercel
+  poweredByHeader: false,
   experimental: {
     serverActions: {
       bodySizeLimit: '1mb',

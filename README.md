@@ -78,19 +78,48 @@ fetch("https://vibe-alerts.com/api/v1/webhook/YOUR-TOKEN", {
 
 - HMAC-SHA256 signatures + timestamp replay protection
 - API key alternative for platforms without HMAC support
-- Rate limiting (Upstash Redis in production)
-- Payload size limits and JSON validation
+- CSRF protection on dashboard mutations (custom header + Origin validation)
+- Security headers on all routes (CSP, HSTS, X-Frame-Options, etc.)
+- Rate limiting (Upstash Redis required in production)
+- Payload size limits enforced before body buffering
+- Webhook auth verified before rate limiting (prevents unauthenticated DoS)
+- RLS column guards on billing/secrets (migration 004)
+- Stripe webhook idempotency (duplicate event dedup)
 - Markdown injection sanitization
+- Outbound SSRF protection (Slack/Teams webhook URL allowlisting)
 - RLS on all user tables
 - Server-only secrets never exposed to client
 
-## Deployment (Vercel)
+Run migrations in order: `001` → `003` → `004`.
 
-1. Push to GitHub, import in Vercel
-2. Set all variables from `.env.example`
-3. Add Upstash Redis for distributed rate limiting (recommended)
-4. Point Stripe webhook to production URL
-5. Set `NEXT_PUBLIC_APP_URL` to your production domain
+## Deployment (Vercel + Cloudflare)
+
+See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for the full step-by-step checklist including domain, Vercel/Railway, Cloudflare, Stripe, and SEO verification.
+
+See **[docs/CLOUDFLARE.md](docs/CLOUDFLARE.md)** for Cloudflare WAF, cache, and webhook-safe configuration.
+
+**Quick deploy to Vercel:**
+
+1. Push to GitHub → import in Vercel
+2. Set env vars from `.env.example`
+3. Connect domain via Cloudflare DNS
+4. Set `NEXT_PUBLIC_APP_URL=https://yourdomain.com`
+5. Run Supabase migrations `001` → `003` → `004`
+6. Verify: `/api/health`, `/sitemap.xml`, `/llms.txt`
+
+## SEO / AEO / LLMO
+
+Built-in discoverability:
+
+| URL | Purpose |
+|-----|---------|
+| `/sitemap.xml` | Search engine sitemap |
+| `/robots.txt` | Crawl directives |
+| `/llms.txt` | AI crawler product summary (LLMO) |
+| `/llms-full.txt` | Extended machine-readable docs |
+| `/opengraph-image` | Social sharing image |
+
+Homepage includes FAQ + HowTo JSON-LD for answer engines (AEO).
 
 ## Future Channels
 
@@ -104,7 +133,7 @@ All notification channels are implemented via the provider pattern in `lib/notif
 | Slack | Incoming Webhook URL | — (per-tenant) |
 | Microsoft Teams | Incoming Webhook URL | — (per-tenant) |
 
-Run migrations in order: `001` → `003` (003 supersedes 002).
+Run migrations in order: `001` → `003` (003 supersedes 002) → `004` (security hardening).
 
 ## License
 

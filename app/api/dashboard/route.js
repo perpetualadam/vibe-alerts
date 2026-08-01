@@ -1,16 +1,13 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { fetchChannelConfigs } from '@/lib/channel-configs/db';
+import { requireDashboardUser } from '@/lib/security/dashboard-auth';
 
 /** GET dashboard data: profile, settings, channel configs, activity */
-export async function GET() {
-  const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+export async function GET(request) {
+  const auth = await requireDashboardUser(request);
+  if (auth.error) return auth.error;
 
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+  const { user, supabase } = auth;
   const [profileRes, settingsRes, eventsRes, logsRes, channelConfigs] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('user_settings').select('*').eq('user_id', user.id).single(),

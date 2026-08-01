@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
+import { applySecurityHeaders } from '@/lib/security/headers';
 
 export async function middleware(request) {
   let response = NextResponse.next({ request });
@@ -23,21 +24,24 @@ export async function middleware(request) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
-  const isLogin = request.nextUrl.pathname.startsWith('/login');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const pathname = request.nextUrl.pathname;
+  const isDashboard = pathname.startsWith('/dashboard');
+  const isLoginRoot = pathname === '/login' || pathname === '/login/';
 
   if (isDashboard && !user) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    response = NextResponse.redirect(new URL('/login', request.url));
+  } else if (isLoginRoot && user) {
+    response = NextResponse.redirect(new URL('/dashboard', request.url));
+  } else if (user && pathname.startsWith('/login/forgot-password')) {
+    response = NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  if (isLogin && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  return response;
+  return applySecurityHeaders(response);
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

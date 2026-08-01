@@ -12,12 +12,6 @@ function getStripe() {
 /**
  * Stripe webhook handler.
  * Configure in Stripe Dashboard → Webhooks → endpoint: /api/stripe/webhook
- *
- * Events handled:
- * - checkout.session.completed → active
- * - invoice.payment_succeeded → active
- * - customer.subscription.deleted → inactive
- * - invoice.payment_failed → inactive
  */
 export async function POST(request) {
   const { stripeWebhookSecret } = getEnv();
@@ -37,6 +31,21 @@ export async function POST(request) {
   }
 
   const supabase = createAdminClient();
+
+  const { error: idempotencyError } = await supabase.from('stripe_webhook_events').insert({
+    id: event.id,
+    event_type: event.type,
+  });
+
+  if (idempotencyError?.code === '23505') {
+    logger.debug('Duplicate Stripe event ignored', { eventId: event.id });
+    return Response.json({ received: true, duplicate: true });
+  }
+
+  if (idempotencyError) {
+    logger.error('Stripe idempotency insert failed', { error: idempotencyError.message });
+    return Response.json({ error: 'Webhook handler failed' }, { status: 500 });
+  }
 
   try {
     switch (event.type) {

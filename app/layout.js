@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from 'next/font/google';
+import { buildPageMetadata } from '@/lib/seo/metadata';
 import './globals.css';
 
 const geistSans = Geist({
@@ -11,10 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata = {
-  title: 'VibeAlerts — Form Leads to Telegram',
-  description: 'Route website form submissions directly to Telegram. Website-agnostic webhook integration.',
-};
+export const metadata = buildPageMetadata();
 
 export default function RootLayout({ children }) {
   return (

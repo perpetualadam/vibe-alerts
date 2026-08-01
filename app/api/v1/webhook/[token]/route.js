@@ -1,4 +1,6 @@
 import { processWebhookRequest, toNextResponse } from '@/lib/webhook/processor';
+import { readBodyWithLimit } from '@/lib/security/body-limit';
+import { getEnv } from '@/lib/env';
 import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
@@ -7,18 +9,10 @@ export const maxDuration = 30;
 /**
  * Universal webhook receiver — works with any website platform.
  *
- * Integration examples:
- * - WordPress: use a webhook plugin pointing POST JSON here
- * - Wix: Automations → Custom Webhook
- * - Webflow: form submission webhook
- * - HTML forms: fetch() from your site or use a form backend
- *
- * Required headers (choose one auth method):
- * - HMAC: X-VibeAlerts-Signature + X-VibeAlerts-Timestamp
- * - API Key: X-VibeAlerts-Key
- *
  * POST /api/v1/webhook/{webhook_token}
  * Content-Type: application/json
+ *
+ * Auth: X-VibeAlerts-Key or HMAC signature headers
  */
 export async function POST(request, { params }) {
   const { token } = await params;
@@ -27,12 +21,10 @@ export async function POST(request, { params }) {
     return Response.json({ error: 'Invalid webhook token' }, { status: 400 });
   }
 
-  let rawBody;
-  try {
-    rawBody = await request.text();
-  } catch (err) {
-    logger.error('Failed to read request body', { error: err.message });
-    return Response.json({ error: 'Invalid request body' }, { status: 400 });
+  const { webhookMaxPayloadBytes } = getEnv();
+  const bodyResult = await readBodyWithLimit(request, webhookMaxPayloadBytes);
+  if (!bodyResult.ok) {
+    return Response.json({ error: bodyResult.error }, { status: bodyResult.status });
   }
 
   const sourceIp =
@@ -43,7 +35,7 @@ export async function POST(request, { params }) {
   try {
     const result = await processWebhookRequest({
       token,
-      rawBody,
+      rawBody: bodyResult.rawBody,
       headers: request.headers,
       sourceIp,
     });
@@ -54,15 +46,9 @@ export async function POST(request, { params }) {
   }
 }
 
-/** Reject non-POST methods */
 export async function GET() {
-  return Response.json(
-    {
-      service: 'VibeAlerts Webhook',
-      method: 'POST',
-      contentType: 'application/json',
-      docs: 'https://vibe-alerts.com/docs/webhook',
-    },
-    { status: 405 }
-  );
+  return new Response(null, {
+    status: 405,
+    headers: { Allow: 'POST' },
+  });
 }

@@ -1,16 +1,12 @@
 import crypto from 'crypto';
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { requireDashboardUser } from '@/lib/security/dashboard-auth';
 
 /** POST regenerate webhook token + secret (authenticated) */
-export async function POST() {
-  const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function POST(request) {
+  const auth = await requireDashboardUser(request, { csrf: true });
+  if (auth.error) return auth.error;
 
   const admin = createAdminClient();
   const newToken = crypto.randomUUID();
@@ -18,7 +14,7 @@ export async function POST() {
   const { data: profile, error: profileError } = await admin
     .from('profiles')
     .update({ webhook_token: newToken })
-    .eq('id', user.id)
+    .eq('id', auth.user.id)
     .select('webhook_token')
     .single();
 
@@ -26,7 +22,6 @@ export async function POST() {
     return NextResponse.json({ error: 'Failed to regenerate token' }, { status: 500 });
   }
 
-  // Rotate webhook secret and API key
   const { data: settings, error: settingsError } = await admin
     .from('user_settings')
     .update({
@@ -34,7 +29,7 @@ export async function POST() {
       api_key: generateHex(24),
       webhook_token_rotated_at: new Date().toISOString(),
     })
-    .eq('user_id', user.id)
+    .eq('user_id', auth.user.id)
     .select('webhook_secret, api_key')
     .single();
 

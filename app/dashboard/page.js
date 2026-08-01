@@ -5,6 +5,8 @@ import ChannelSettings, {
   isAnyChannelConfiguredFromCatalog,
 } from '@/components/dashboard/ChannelSettings';
 import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
+import { dashboardMutationHeaders } from '@/lib/security/client-headers';
+import { createClient } from '@/lib/supabase/client';
 
 function StatusBadge({ active }) {
   return (
@@ -166,8 +168,16 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [apiKey, setApiKey] = useState(null);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
+  const supabase = createClient();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || '';
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  };
 
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
@@ -205,7 +215,7 @@ export default function DashboardPage() {
   const saveChannelSettings = async (body) => {
     const res = await fetch('/api/dashboard/settings', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: dashboardMutationHeaders(),
       body: JSON.stringify(body),
     });
     if (!res.ok) {
@@ -283,7 +293,10 @@ export default function DashboardPage() {
     }
     setRegenerating(true);
     try {
-      const res = await fetch('/api/dashboard/regenerate-token', { method: 'POST' });
+      const res = await fetch('/api/dashboard/regenerate-token', {
+        method: 'POST',
+        headers: dashboardMutationHeaders(),
+      });
       if (!res.ok) throw new Error('Regeneration failed');
       const json = await res.json();
       setData((prev) => ({
@@ -330,7 +343,17 @@ export default function DashboardPage() {
             <h1 className="text-xl font-bold">VibeAlerts</h1>
             <p className="text-sm text-vibe-muted">{data?.profile?.email}</p>
           </div>
-          <StatusBadge active={isActive} />
+          <div className="flex items-center gap-3">
+            <StatusBadge active={isActive} />
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="text-xs text-vibe-muted hover:text-white transition-colors disabled:opacity-50"
+            >
+              {loggingOut ? 'Signing out…' : 'Sign out'}
+            </button>
+          </div>
         </div>
       </header>
 

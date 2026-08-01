@@ -1,21 +1,25 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getPlugin, validatePluginConfig } from '@/lib/notifications';
 import { upsertChannelConfig } from '@/lib/channel-configs/db';
+import { requireDashboardUser } from '@/lib/security/dashboard-auth';
 
 /**
  * PATCH notification plugin settings.
  * Body: { channel, enabled?, config? }
  */
 export async function PATCH(request) {
-  const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const auth = await requireDashboardUser(request, { csrf: true });
+  if (auth.error) return auth.error;
 
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { user, supabase } = auth;
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const body = await request.json();
   const { channel, enabled, config } = body;
 
   if (!channel || typeof channel !== 'string') {
@@ -27,7 +31,6 @@ export async function PATCH(request) {
     return NextResponse.json({ error: `Unknown channel: ${channel}` }, { status: 400 });
   }
 
-  // Load existing row to merge config
   const { data: existing } = await supabase
     .from('channel_configs')
     .select('config, enabled')
@@ -36,11 +39,11 @@ export async function PATCH(request) {
     .maybeSingle();
 
   const nextEnabled = enabled !== undefined ? Boolean(enabled) : (existing?.enabled ?? false);
-  const mergedConfig = config !== undefined
-    ? { ...(existing?.config ?? {}), ...config }
-    : (existing?.config ?? {});
+  const mergedConfig =
+    config !== undefined
+      ? { ...(existing?.config ?? {}), ...config }
+      : (existing?.config ?? {});
 
-  // Validate config when provided and channel is enabled with non-empty config
   if (config !== undefined && nextEnabled) {
     const hasValues = Object.values(mergedConfig).some((v) => String(v ?? '').trim());
     if (hasValues) {

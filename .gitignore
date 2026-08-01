@@ -1,7 +1,11 @@
+.env
 .env*.local
+.env.production
+.env.development
 node_modules/
 .next/
 out/
 .vercel
 *.log
 .DS_Store
+.env*

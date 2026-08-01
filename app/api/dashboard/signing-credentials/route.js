@@ -1,22 +1,18 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { requireDashboardUser } from '@/lib/security/dashboard-auth';
 
 /**
  * GET signing credentials for authenticated test requests.
  * Only available to logged-in user — never expose via public routes.
  */
-export async function GET() {
-  const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+export async function GET(request) {
+  const auth = await requireDashboardUser(request);
+  if (auth.error) return auth.error;
 
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data, error } = await supabase
+  const { data, error } = await auth.supabase
     .from('user_settings')
     .select('webhook_secret, api_key')
-    .eq('user_id', user.id)
+    .eq('user_id', auth.user.id)
     .single();
 
   if (error || !data) {
