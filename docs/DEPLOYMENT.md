@@ -38,6 +38,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 TELEGRAM_BOT_TOKEN=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
+STRIPE_PRICE_ID=
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
@@ -78,9 +79,11 @@ If URI Path starts with /api/ → Cache eligibility: Bypass
 
 | # | Task | Details |
 |---|------|---------|
-| 25 | Stripe webhook endpoint | `https://yourdomain.com/api/stripe/webhook` |
-| 26 | Stripe events | `checkout.session.completed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.deleted` |
-| 27 | Test end-to-end | Sign up → activate → Send Test Alert |
+| 25 | Stripe product + price | Create recurring **VibeAlerts** subscription price; set `STRIPE_PRICE_ID` in Vercel |
+| 26 | Stripe webhook endpoint | `https://yourdomain.com/api/stripe/webhook` |
+| 27 | Stripe events | `checkout.session.completed`, `checkout.session.async_payment_failed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` |
+| 28 | Customer Portal | Enable in Stripe Dashboard → Settings → Billing → Customer portal |
+| 29 | Test end-to-end | Sign up → **Subscribe** in dashboard → Send Test Alert |
 
 ### Phase 6 — SEO / AEO / LLMO verification
 

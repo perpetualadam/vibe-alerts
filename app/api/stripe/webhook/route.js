@@ -1,20 +1,24 @@
-import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getEnv } from '@/lib/env';
+import { getStripe } from '@/lib/stripe/client';
+import {
+  mapStripeSubscriptionStatus,
+  resolveCheckoutUserId,
+  resolveInvoiceEmail,
+} from '@/lib/stripe/status';
 import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
-
-function getStripe() {
-  return new Stripe(getEnv().stripeSecretKey);
-}
 
 /**
  * Stripe webhook handler.
  * Configure in Stripe Dashboard → Webhooks → endpoint: /api/stripe/webhook
  */
 export async function POST(request) {
-  const { stripeWebhookSecret } = getEnv();
+  const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!stripeWebhookSecret) {
+    return Response.json({ error: 'Webhook secret not configured' }, { status: 500 });
+  }
+
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
 
@@ -51,15 +55,40 @@ export async function POST(request) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
+        const userId = resolveCheckoutUserId(session);
         const email = session.customer_details?.email || session.customer_email;
-        if (email) await setSubscriptionStatus(supabase, email, 'active');
+        await setSubscriptionStatus(supabase, { userId, email }, 'active');
+        break;
+      }
+
+      case 'checkout.session.async_payment_failed': {
+        const session = event.data.object;
+        const userId = resolveCheckoutUserId(session);
+        const email = session.customer_details?.email || session.customer_email;
+        await setSubscriptionStatus(supabase, { userId, email }, 'inactive');
         break;
       }
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
-        const email = invoice.customer_email;
-        if (email) await setSubscriptionStatus(supabase, email, 'active');
+        const email = resolveInvoiceEmail(invoice);
+        if (email) await setSubscriptionStatus(supabase, { email }, 'active');
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object;
+        const email = resolveInvoiceEmail(invoice);
+        if (email) await setSubscriptionStatus(supabase, { email }, 'inactive');
+        break;
+      }
+
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object;
+        const status = mapStripeSubscriptionStatus(subscription.status);
+        const customer = await getStripe().customers.retrieve(subscription.customer);
+        const email = customer.email;
+        if (email) await setSubscriptionStatus(supabase, { email }, status);
         break;
       }
 
@@ -67,14 +96,7 @@ export async function POST(request) {
         const subscription = event.data.object;
         const customer = await getStripe().customers.retrieve(subscription.customer);
         const email = customer.email;
-        if (email) await setSubscriptionStatus(supabase, email, 'inactive');
-        break;
-      }
-
-      case 'invoice.payment_failed': {
-        const invoice = event.data.object;
-        const email = invoice.customer_email;
-        if (email) await setSubscriptionStatus(supabase, email, 'inactive');
+        if (email) await setSubscriptionStatus(supabase, { email }, 'inactive');
         break;
       }
 
@@ -89,16 +111,23 @@ export async function POST(request) {
   return Response.json({ received: true });
 }
 
-async function setSubscriptionStatus(supabase, email, status) {
-  const { error } = await supabase
-    .from('profiles')
-    .update({ stripe_subscription_status: status })
-    .eq('email', email);
+async function setSubscriptionStatus(supabase, { userId, email }, status) {
+  let query = supabase.from('profiles').update({ stripe_subscription_status: status });
+
+  if (userId) {
+    query = query.eq('id', userId);
+  } else if (email) {
+    query = query.eq('email', email);
+  } else {
+    throw new Error('Cannot update subscription status without user id or email');
+  }
+
+  const { error } = await query;
 
   if (error) {
-    logger.error('Failed to update subscription status', { email, status, error: error.message });
+    logger.error('Failed to update subscription status', { userId, email, status, error: error.message });
     throw error;
   }
 
-  logger.info('Subscription status updated', { email, status });
+  logger.info('Subscription status updated', { userId, email, status });
 }

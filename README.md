@@ -22,7 +22,8 @@ npm run dev
 1. Run `supabase/migrations/001_initial_schema.sql` in Supabase SQL Editor
 2. Create a Telegram bot via [@BotFather](https://t.me/BotFather)
 3. Configure Stripe webhook → `https://your-domain.com/api/stripe/webhook`
-4. Sign up at `/login`, configure dashboard at `/dashboard`
+4. Set `STRIPE_PRICE_ID` to your recurring subscription price ID
+5. Sign up at `/login`, subscribe from `/dashboard`, configure channels
 
 ## Project Structure
 
@@ -30,6 +31,8 @@ npm run dev
 app/
 ├── api/
 │   ├── v1/webhook/[token]/route.js   # Universal webhook receiver
+│   ├── stripe/checkout/route.js      # Stripe Checkout session
+│   ├── stripe/portal/route.js        # Stripe Customer Portal
 │   ├── stripe/webhook/route.js       # Stripe subscription sync
 │   └── dashboard/                    # Authenticated dashboard APIs
 ├── dashboard/page.js               # Owner dashboard UI

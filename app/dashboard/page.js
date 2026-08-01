@@ -169,6 +169,7 @@ export default function DashboardPage() {
   const [apiKey, setApiKey] = useState(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(false);
 
   const supabase = createClient();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || '';
@@ -207,6 +208,53 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchDashboard();
   }, [fetchDashboard]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const billing = params.get('billing');
+    if (billing === 'success') {
+      showToast('Subscription activated. You can send test alerts now.', 'success');
+      fetchDashboard();
+      window.history.replaceState({}, '', '/dashboard');
+    } else if (billing === 'cancelled') {
+      showToast('Checkout cancelled.', 'info');
+      window.history.replaceState({}, '', '/dashboard');
+    }
+    // Run once on mount to handle Stripe redirect query params.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const startCheckout = async () => {
+    setBillingLoading(true);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: dashboardMutationHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Could not start checkout');
+      window.location.href = json.url;
+    } catch (err) {
+      showToast(err.message || 'Could not start checkout', 'error');
+      setBillingLoading(false);
+    }
+  };
+
+  const openBillingPortal = async () => {
+    setBillingLoading(true);
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: dashboardMutationHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Could not open billing portal');
+      window.location.href = json.url;
+    } catch (err) {
+      showToast(err.message || 'Could not open billing portal', 'error');
+      setBillingLoading(false);
+    }
+  };
 
   const webhookUrl = data?.profile?.webhook_token
     ? `${appUrl}/api/v1/webhook/${data.profile.webhook_token}`
@@ -358,11 +406,35 @@ export default function DashboardPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
-        {!isActive && (
-          <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-amber-200 text-sm">
-            Your subscription is inactive. Webhook requests will return <strong>402 Payment Required</strong> until you activate billing.
+        <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">Billing</h2>
+            <p className="text-sm text-vibe-muted mt-1">
+              {isActive
+                ? 'Your subscription is active. Manage payment method or cancel anytime.'
+                : 'Activate your subscription to receive form webhook alerts. Inactive accounts return 402 Payment Required.'}
+            </p>
           </div>
-        )}
+          {isActive ? (
+            <button
+              type="button"
+              onClick={openBillingPortal}
+              disabled={billingLoading}
+              className="px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+            >
+              {billingLoading ? 'Opening…' : 'Manage billing'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={startCheckout}
+              disabled={billingLoading}
+              className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+            >
+              {billingLoading ? 'Redirecting…' : 'Subscribe'}
+            </button>
+          )}
+        </section>
 
         <HealthIndicator
           plugins={plugins}
