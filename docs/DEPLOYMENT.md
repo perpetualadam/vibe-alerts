@@ -40,6 +40,7 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
 
 ### Phase 3 — Custom domain via Cloudflare
@@ -52,6 +53,7 @@ UPSTASH_REDIS_REST_TOKEN=
 | 16 | In Vercel → Settings → Domains | Add `yourdomain.com` + `www.yourdomain.com` |
 | 17 | Cloudflare SSL/TLS mode | **Full (strict)** |
 | 18 | Update `NEXT_PUBLIC_APP_URL` | Redeploy with production domain |
+| 19 | **Google Analytics** (optional) | Create GA4 property → set `NEXT_PUBLIC_GA_MEASUREMENT_ID` in Vercel → redeploy |
 
 ### Phase 4 — Cloudflare hardening (important for webhooks)
 

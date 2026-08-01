@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from 'next/font/google';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import './globals.css';
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         {children}
+        <GoogleAnalytics />
       </body>
     </html>
   );
