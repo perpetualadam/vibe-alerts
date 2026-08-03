@@ -78,6 +78,8 @@ If URI Path starts with /api/ → Cache eligibility: Bypass
 
 ### Phase 5 — Stripe & webhooks in production
 
+See **[STRIPE_LIVE.md](./STRIPE_LIVE.md)** for the full live-mode checklist (product, webhook, Vercel env vars, verification).
+
 | # | Task | Details |
 |---|------|---------|
 | 25 | Stripe product + price | Create recurring **VibeAlerts** subscription price; set `STRIPE_PRICE_ID` in Vercel |
@@ -86,6 +88,19 @@ If URI Path starts with /api/ → Cache eligibility: Bypass
 | 28 | Customer Portal | Enable in Stripe Dashboard → Settings → Billing → Customer portal |
 | 29 | Test end-to-end | Sign up → **Subscribe** in dashboard → Send Test Alert |
 | 30 | **Stripe website compliance** | Public pages live: `/pricing`, `/contact`, `/terms`, `/privacy`, `/refunds` with support email in footer |
+
+### Optional — Email & WhatsApp channels (platform operator)
+
+Telegram, Slack, and Teams work out of the box for customers (Telegram uses your `TELEGRAM_BOT_TOKEN`; Slack/Teams use customer webhook URLs).
+
+**Email** and **WhatsApp** require extra credentials in **Vercel only** — customers never see or configure these:
+
+| Channel | Vercel env vars | Where to get them |
+|---------|-----------------|-------------------|
+| Email | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | [Resend](https://resend.com) |
+| WhatsApp | `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` | [Meta WhatsApp Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api) |
+
+Until set, the dashboard shows **Unavailable** for those channels with a support email link — not internal env var names.
 
 ### Phase 6 — SEO / AEO / LLMO verification
 

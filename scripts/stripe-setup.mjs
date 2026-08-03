@@ -1,8 +1,30 @@
 import Stripe from 'stripe';
 import fs from 'fs';
 
-const env = fs.readFileSync('.env.local', 'utf8');
-const key = env.match(/STRIPE_SECRET_KEY="([^"]+)"/)?.[1];
+function readStripeKey() {
+  if (process.env.STRIPE_SECRET_KEY?.trim()) {
+    return process.env.STRIPE_SECRET_KEY.trim();
+  }
+
+  if (fs.existsSync('.env.local')) {
+    const env = fs.readFileSync('.env.local', 'utf8');
+    const match = env.match(/^STRIPE_SECRET_KEY="([^"]+)"/m)?.[1];
+    if (match) return match;
+  }
+
+  throw new Error(
+    'Set STRIPE_SECRET_KEY in the environment or in .env.local before running this script.'
+  );
+}
+
+const key = readStripeKey();
+const mode = key.startsWith('sk_live_') || key.startsWith('rk_live_') ? 'live' : 'test';
+console.log('STRIPE_MODE', mode);
+
+if (mode === 'test' && process.argv.includes('--require-live')) {
+  throw new Error('Refusing to run against test keys. Pass a live secret/restricted key.');
+}
+
 const stripe = new Stripe(key);
 
 const APP_URL = 'https://vibe-alerts.com';

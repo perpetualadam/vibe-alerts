@@ -9,7 +9,9 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify:email-dns": "node scripts/verify-email-dns.mjs"
+    "verify:email-dns": "node scripts/verify-email-dns.mjs",
+    "stripe:setup": "node scripts/stripe-setup.mjs",
+    "stripe:setup:live": "node scripts/stripe-setup.mjs --require-live"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

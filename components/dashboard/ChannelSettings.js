@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
+const SUPPORT_EMAIL =
+  process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || 'support@vibe-alerts.com';
+
 /**
  * Renders channel configuration from the plugin registry catalog.
  * No hardcoded channel definitions — driven by /api/dashboard/plugins.
@@ -36,6 +39,7 @@ export default function ChannelSettings({
   };
 
   const isPluginConfigured = (plugin) => {
+    if (plugin.platformReady === false) return false;
     const entry = channelConfigs?.[plugin.id];
     if (!entry?.enabled) return false;
     if (!entry?.config) return false;
@@ -135,10 +139,18 @@ export default function ChannelSettings({
                 <div className="flex items-center gap-3">
                   <span
                     className={`text-xs font-medium ${
-                      configured ? 'text-emerald-400' : 'text-vibe-muted'
+                      !plugin.platformReady
+                        ? 'text-amber-400'
+                        : configured
+                          ? 'text-emerald-400'
+                          : 'text-vibe-muted'
                     }`}
                   >
-                    {configured ? '● Configured' : '○ Not configured'}
+                    {!plugin.platformReady
+                      ? '○ Unavailable'
+                      : configured
+                        ? '● Configured'
+                        : '○ Not configured'}
                   </span>
                   <span className="text-vibe-muted text-sm">{isOpen ? '▾' : '▸'}</span>
                 </div>
@@ -146,6 +158,25 @@ export default function ChannelSettings({
 
               {isOpen && (
                 <div className="px-5 pb-5 space-y-4 border-t border-vibe-border pt-4">
+                  {plugin.platformReady === false && (
+                    <div className="text-xs text-amber-200/90 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 space-y-1">
+                      <p>
+                        {plugin.platformUnavailableMessage ||
+                          `${plugin.label} is not available on VibeAlerts yet.`}
+                      </p>
+                      <p>
+                        Need this channel? Email{' '}
+                        <a
+                          href={`mailto:${SUPPORT_EMAIL}`}
+                          className="text-vibe-accent hover:underline"
+                        >
+                          {SUPPORT_EMAIL}
+                        </a>
+                        .
+                      </p>
+                    </div>
+                  )}
+
                   {plugin.configSchema.map((field) => (
                     <div key={field.key}>
                       <label className="block text-sm text-vibe-muted mb-1.5">
@@ -162,7 +193,8 @@ export default function ChannelSettings({
                           }))
                         }
                         placeholder={field.placeholder}
-                        className="w-full bg-black/40 border border-vibe-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-vibe-accent/50"
+                        disabled={plugin.platformReady === false}
+                        className="w-full bg-black/40 border border-vibe-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-vibe-accent/50 disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                       {field.help && (
                         <p className="text-xs text-vibe-muted mt-1.5">{field.help}</p>
@@ -170,7 +202,7 @@ export default function ChannelSettings({
                     </div>
                   ))}
 
-                  {plugin.setupGuide?.length > 0 && (
+                  {plugin.platformReady !== false && plugin.setupGuide?.length > 0 && (
                     <ol className="text-xs text-vibe-muted space-y-2 list-decimal list-inside bg-black/20 rounded-lg p-3">
                       {plugin.setupGuide.map((step, i) => (
                         <li key={i}>{step}</li>
@@ -181,7 +213,7 @@ export default function ChannelSettings({
                   <button
                     type="button"
                     onClick={() => savePlugin(plugin)}
-                    disabled={saving === plugin.id}
+                    disabled={saving === plugin.id || plugin.platformReady === false}
                     className="px-4 py-2 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
                   >
                     {saving === plugin.id ? 'Saving…' : `Save ${plugin.label}`}
@@ -199,6 +231,7 @@ export default function ChannelSettings({
 export function isAnyChannelConfiguredFromCatalog(plugins, channelConfigs) {
   if (!plugins?.length || !channelConfigs) return false;
   return plugins.some((plugin) => {
+    if (plugin.platformReady === false) return false;
     const entry = channelConfigs[plugin.id];
     if (!entry?.enabled) return false;
     return plugin.configSchema.every((field) => {

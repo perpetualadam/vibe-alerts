@@ -230,3 +230,43 @@ curl https://yourdomain.com/sitemap.xml
 ```
 
 Check response headers for `cf-cache-status: BYPASS` on `/api/health`.
+
+## Email Routing (support@vibe-alerts.com)
+
+Forward inbound mail for Stripe/compliance contact to your personal inbox using **Cloudflare Email Routing** (free).
+
+**Target:** `support@vibe-alerts.com` → `craftopiamedia@gmail.com`
+
+### Prerequisites
+
+1. Cloudflare zone `vibe-alerts.com` must show **Active** (nameservers propagated from name.com).
+2. Until the zone is active, Email Routing cannot enable MX records. Dashboard may show: *"This zone must be active before you can enable Email Service."*
+
+### Manual setup (dashboard)
+
+1. [Email Routing](https://dash.cloudflare.com) → **vibe-alerts.com** → **Email** → **Email Routing**
+2. **Destination addresses** → **Add address** → enter `craftopiamedia@gmail.com` → verify the Cloudflare email in that inbox
+3. When the zone is **Active**, click **Enable Email Routing** (or **Add missing records**) to publish MX/TXT
+4. **Routing rules** → **Create address** → Custom address `support` → forward to your verified Gmail
+5. Test:
+
+```bash
+nslookup -type=MX vibe-alerts.com
+# Expect: route1.mx.cloudflare.net, route2.mx.cloudflare.net, route3.mx.cloudflare.net
+```
+
+Send a test message to `support@vibe-alerts.com` and confirm it arrives in Gmail.
+
+### Automated setup (after zone is Active)
+
+Create a Cloudflare API token with **Zone:Read**, **DNS:Edit**, and **Email Routing Edit** for `vibe-alerts.com`, then:
+
+```bash
+CLOUDFLARE_API_TOKEN=your_token node scripts/cloudflare-email-routing.mjs
+```
+
+Optional env overrides: `SUPPORT_FORWARD_TO`, `SUPPORT_LOCAL_PART`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_ACCOUNT_ID`.
+
+### Stripe note
+
+Stripe activation checks that your public support email exists. Once MX records propagate and forwarding works, `support@vibe-alerts.com` (already on `/contact`, `/terms`, etc.) will receive mail without a paid mailbox provider.
