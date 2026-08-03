@@ -99,7 +99,7 @@ Run migrations in order: `001` → `003` → `004`.
 
 See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for the full step-by-step checklist including domain, Vercel/Railway, Cloudflare, Stripe, and SEO verification.
 
-See **[docs/CLOUDFLARE.md](docs/CLOUDFLARE.md)** for Cloudflare WAF, cache, and webhook-safe configuration.
+See **[docs/CLOUDFLARE.md](docs/CLOUDFLARE.md)** for Cloudflare WAF, cache, webhook-safe configuration, and **Email Routing + Resend SPF** coexistence (`npm run verify:email-dns`).
 
 **Quick deploy to Vercel:**
 

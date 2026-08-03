@@ -49,12 +49,13 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 | # | Task | Details |
 |---|------|---------|
 | 13 | Add site to [Cloudflare](https://dash.cloudflare.com) | Free plan is fine |
-| 14 | Update nameservers at registrar | Point to Cloudflare NS records |
+| 14 | Update nameservers at registrar | Point to **both** Cloudflare NS records (never mix with registrar NS) |
 | 15 | Add DNS record | `CNAME @ → cname.vercel-dns.com` (or Vercel's assigned domain) |
 | 16 | In Vercel → Settings → Domains | Add `yourdomain.com` + `www.yourdomain.com` |
 | 17 | Cloudflare SSL/TLS mode | **Full (strict)** |
 | 18 | Update `NEXT_PUBLIC_APP_URL` | Redeploy with production domain |
 | 19 | **Google Analytics** (optional) | Create GA4 property → set `NEXT_PUBLIC_GA_MEASUREMENT_ID` in Vercel → redeploy |
+| 19b | **Email Routing + Resend SPF** | Enable Cloudflare Email Routing for `support@`, then merge root SPF with `include:resend.com` — see [docs/CLOUDFLARE.md](./CLOUDFLARE.md#email-routing-inbound--resend-outbound-alerts). Run `npm run verify:email-dns` |
 
 ### Phase 4 — Cloudflare hardening (important for webhooks)
 
@@ -178,3 +179,5 @@ Website forms ──→ Cloudflare ──→ /api/v1/webhook/{token}  (must bypa
 | Cloudflare 403 on forms | Disable Bot Fight Mode or add WAF exception for `/api/v1/webhook/*` |
 | Rate limit 429 | Increase limit in DB or add Upstash |
 | OG image broken | Redeploy — `app/opengraph-image.jsx` generates dynamically |
+| `support@` mail never arrives after Email Routing | Mixed NS / missing MX / unverified destination — finish Cloudflare NS cutover, enable routing, run `npm run verify:email-dns` |
+| Lead alert emails stop after Email Routing | Root SPF overwritten — merge to `v=spf1 include:_spf.mx.cloudflare.net include:resend.com ~all` |

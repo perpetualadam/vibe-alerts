@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verify:email-dns": "node scripts/verify-email-dns.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
