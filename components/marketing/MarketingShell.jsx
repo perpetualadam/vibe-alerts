@@ -3,10 +3,10 @@ import MarketingHeader from '@/components/marketing/MarketingHeader';
 
 export default function MarketingShell({ children }) {
   return (
-    <>
+    <div className="marketing-page min-h-screen flex flex-col">
       <MarketingHeader />
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
       <MarketingFooter />
-    </>
+    </div>
   );
 }

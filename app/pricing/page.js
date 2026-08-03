@@ -23,7 +23,7 @@ export default function PricingPage() {
 
   return (
     <MarketingShell>
-      <section className="max-w-3xl mx-auto px-6 py-16 space-y-10">
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20 space-y-10">
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold">Simple subscription pricing</h1>
           <p className="text-vibe-muted text-lg">
@@ -58,16 +58,10 @@ export default function PricingPage() {
             ))}
           </ul>
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white font-medium transition-colors"
-            >
-              Create account{trialLabel ? ' & start trial' : ' & subscribe'}
+            <Link href="/login" className="btn-primary px-6 py-3">
+              Create account{trialLabel ? ' & start trial' : ''}
             </Link>
-            <Link
-              href="/refunds"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors"
-            >
+            <Link href="/refunds" className="btn-secondary px-6 py-3">
               Refund &amp; cancellation policy
             </Link>
           </div>

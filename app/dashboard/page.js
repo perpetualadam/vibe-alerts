@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import ChannelSettings, {
   isAnyChannelConfiguredFromCatalog,
@@ -8,6 +9,7 @@ import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
 import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 import { createClient } from '@/lib/supabase/client';
 import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
+import { SITE } from '@/lib/seo/site';
 
 function StatusBadge({ active }) {
   return (
@@ -411,11 +413,14 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <header className="border-b border-vibe-border">
-        <div className="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+      <header className="border-b border-vibe-border bg-vibe-bg/80 backdrop-blur-lg sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold">VibeAlerts</h1>
-            <p className="text-sm text-vibe-muted">{data?.profile?.email}</p>
+            <Link href="/" className="text-sm text-vibe-muted hover:text-white transition-colors">
+              ← {SITE.name}
+            </Link>
+            <h1 className="text-xl font-bold mt-1">Dashboard</h1>
+            <p className="text-sm text-vibe-muted truncate max-w-[240px] sm:max-w-none">{data?.profile?.email}</p>
           </div>
           <div className="flex items-center gap-3">
             <StatusBadge active={isActive} />

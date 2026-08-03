@@ -12,8 +12,37 @@ body {
   color: var(--foreground);
 }
 
+@layer components {
+  .marketing-page {
+    @apply bg-vibe-bg text-white;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(99 102 241 / 0.18), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgb(99 102 241 / 0.08), transparent);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-vibe-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-vibe-bg;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20;
+  }
+
+  .section-heading {
+    @apply text-2xl sm:text-3xl font-bold tracking-tight text-center;
+  }
+
+  .section-lead {
+    @apply text-vibe-muted text-center max-w-2xl mx-auto leading-relaxed;
+  }
+}
+
 @layer utilities {
   .glass {
     @apply bg-vibe-surface/80 backdrop-blur-xl border border-vibe-border;
+  }
+
+  .glass-strong {
+    @apply bg-vibe-surface/90 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/20;
   }
 }
