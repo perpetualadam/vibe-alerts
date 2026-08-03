@@ -2,6 +2,7 @@ import Link from 'next/link';
 import JsonLd from '@/components/marketing/JsonLd';
 import MarketingShell from '@/components/marketing/MarketingShell';
 import TrustBadges from '@/components/marketing/TrustBadges';
+import AudienceProblems from '@/components/marketing/AudienceProblems';
 import { buildHomePageSchemas, getMarketingFaqs, getHowToSteps } from '@/lib/seo/jsonld';
 import { SITE } from '@/lib/seo/site';
 import { getSubscriptionPriceLabel } from '@/lib/legal/site';
@@ -90,8 +91,8 @@ export default function HomePage() {
                 <Link href="/login" className="btn-primary px-6 py-3 text-base">
                   {trialLabel ? 'Start your free trial' : 'Create free account'}
                 </Link>
-                <a href="#how-it-works" className="btn-secondary px-6 py-3 text-base">
-                  See how it works
+                <a href="#who-its-for" className="btn-secondary px-6 py-3 text-base">
+                  Who it&apos;s for
                 </a>
               </div>
             </div>
@@ -140,6 +141,8 @@ export default function HomePage() {
             </ul>
           </div>
         </section>
+
+        <AudienceProblems />
 
         {/* Features */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20" aria-labelledby="features-heading">

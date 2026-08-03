@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import MarketingShell from '@/components/marketing/MarketingShell';
+import AudienceProblems from '@/components/marketing/AudienceProblems';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { getLegalContext } from '@/lib/legal/site';
 
@@ -23,7 +24,7 @@ export default function PricingPage() {
 
   return (
     <MarketingShell>
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20 space-y-10">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 space-y-16">
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold">Simple subscription pricing</h1>
           <p className="text-vibe-muted text-lg">
@@ -32,7 +33,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <article className="glass rounded-2xl p-8 space-y-6 border border-vibe-border">
+        <article className="glass rounded-2xl p-8 space-y-6 border border-vibe-border max-w-3xl mx-auto">
           <div className="space-y-1">
             <p className="text-sm uppercase tracking-wider text-vibe-accent font-medium">VibeAlerts Pro</p>
             {trialLabel ? (
@@ -67,7 +68,9 @@ export default function PricingPage() {
           </div>
         </article>
 
-        <div className="text-sm text-vibe-muted space-y-2">
+        <AudienceProblems compact showSecondary={false} />
+
+        <div className="text-sm text-vibe-muted space-y-2 max-w-3xl mx-auto">
           <p>
             Questions about billing? Email{' '}
             <a href={`mailto:${supportEmail}`} className="text-vibe-accent hover:underline">
