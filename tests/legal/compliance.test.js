@@ -15,6 +15,7 @@ describe('Stripe business website compliance', () => {
     const ctx = getLegalContext();
     expect(ctx.supportEmail).toContain('@');
     expect(ctx.contactUrl).toBe('https://vibe-alerts.com/contact');
+    expect(ctx.trialLabel).toBe('14-day free trial');
   });
 
   it('lists required public policy pages', () => {

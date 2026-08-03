@@ -31,7 +31,29 @@ export default function RefundsPage() {
         </section>
 
         <section>
-          <h2>2. Refund policy</h2>
+          <h2>2. Free trial</h2>
+          {ctx.trialLabel ? (
+            <ul>
+              <li>
+                New customers receive a {ctx.trialLabel.toLowerCase()} with full access to {ctx.siteName}. A payment
+                method is collected at signup through Stripe.
+              </li>
+              <li>
+                You will not be charged during the trial if you cancel before it ends via{' '}
+                <strong>Manage billing</strong> in your dashboard.
+              </li>
+              <li>
+                If the trial is not canceled, the subscription converts to {ctx.priceLabel} and the first charge occurs
+                when the trial ends, as shown at checkout.
+              </li>
+            </ul>
+          ) : (
+            <p>We do not currently offer a free trial. Standard subscription billing applies at checkout.</p>
+          )}
+        </section>
+
+        <section>
+          <h2>3. Refund policy</h2>
           <ul>
             <li>
               <strong>First subscription payment:</strong> If the service does not work as described and our support
@@ -51,7 +73,7 @@ export default function RefundsPage() {
         </section>
 
         <section>
-          <h2>3. Cancellation policy</h2>
+          <h2>4. Cancellation policy</h2>
           <ul>
             <li>
               You may cancel anytime from your dashboard by clicking <strong>Manage billing</strong>, which opens the
@@ -69,7 +91,7 @@ export default function RefundsPage() {
         </section>
 
         <section>
-          <h2>4. Disputes and chargebacks</h2>
+          <h2>5. Disputes and chargebacks</h2>
           <p>
             If you have a billing problem, please contact{' '}
             <a href={`mailto:${ctx.supportEmail}`}>{ctx.supportEmail}</a> before opening a payment dispute or
@@ -81,7 +103,7 @@ export default function RefundsPage() {
         </section>
 
         <section>
-          <h2>5. Promotional offers</h2>
+          <h2>6. Promotional offers</h2>
           <p>
             From time to time we may offer discounted or extended trial pricing. Promotional terms (duration, eligibility,
             and whether the offer converts to standard {ctx.priceLabel} pricing) will be shown at checkout and on the
@@ -91,7 +113,7 @@ export default function RefundsPage() {
         </section>
 
         <section>
-          <h2>6. Export and legal restrictions</h2>
+          <h2>7. Export and legal restrictions</h2>
           <p>
             {ctx.siteName} is offered globally where permitted by law. You are responsible for ensuring your use complies
             with local regulations. We may restrict access where required by sanctions, export controls, or legal
@@ -100,7 +122,7 @@ export default function RefundsPage() {
         </section>
 
         <section>
-          <h2>7. Contact</h2>
+          <h2>8. Contact</h2>
           <p>
             Billing support: <a href={`mailto:${ctx.supportEmail}`}>{ctx.supportEmail}</a> ·{' '}
             <Link href={ctx.contactUrl}>Contact page</Link> ·{' '}

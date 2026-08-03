@@ -4,6 +4,7 @@ import MarketingShell from '@/components/marketing/MarketingShell';
 import { buildHomePageSchemas, getMarketingFaqs, getHowToSteps } from '@/lib/seo/jsonld';
 import { SITE } from '@/lib/seo/site';
 import { getSubscriptionPriceLabel } from '@/lib/legal/site';
+import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
 
 const features = [
   {
@@ -32,6 +33,7 @@ export default function HomePage() {
   const faqs = getMarketingFaqs();
   const howTo = getHowToSteps();
   const priceLabel = getSubscriptionPriceLabel();
+  const trialLabel = getSubscriptionTrialLabel();
 
   return (
     <>
@@ -48,7 +50,13 @@ export default function HomePage() {
           </h1>
           <p className="text-vibe-muted text-lg max-w-2xl mx-auto">{SITE.description}</p>
           <p className="text-sm text-vibe-muted">
-            Subscription from {priceLabel}.{' '}
+            {trialLabel ? (
+              <>
+                {trialLabel}, then {priceLabel}.{' '}
+              </>
+            ) : (
+              <>Subscription from {priceLabel}. </>
+            )}
             <Link href="/pricing" className="text-vibe-accent hover:underline">
               View pricing
             </Link>

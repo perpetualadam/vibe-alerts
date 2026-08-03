@@ -7,6 +7,7 @@ import ChannelSettings, {
 import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
 import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 import { createClient } from '@/lib/supabase/client';
+import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
 
 function StatusBadge({ active }) {
   return (
@@ -87,6 +88,15 @@ function ActivityFeed({ events, logs }) {
                   {e.error_message && (
                     <p className="text-vibe-muted text-xs mt-1">{e.error_message}</p>
                   )}
+                  {Array.isArray(e.delivery_summary) && e.delivery_summary.length > 0 && (
+                    <ul className="text-vibe-muted text-xs mt-1 space-y-0.5">
+                      {e.delivery_summary.map((entry) => (
+                        <li key={entry.channel}>
+                          {entry.channel}: {entry.success ? 'sent' : entry.error || 'failed'}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <time className="text-xs text-vibe-muted whitespace-nowrap">
                   {formatRelativeTime(e.created_at)}
@@ -156,6 +166,14 @@ function formatRelativeTime(iso) {
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
   return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function formatDeliveryErrors(delivery) {
+  if (!Array.isArray(delivery) || delivery.length === 0) return null;
+  return delivery
+    .filter((entry) => !entry.success)
+    .map((entry) => `${entry.channel}: ${entry.error || 'failed'}`)
+    .join(' · ');
 }
 
 export default function DashboardPage() {
@@ -307,13 +325,20 @@ export default function DashboardPage() {
 
       const result = await res.json();
       if (!res.ok) {
-        throw new Error(result.error || `Test failed (HTTP ${res.status})`);
+        const detail = formatDeliveryErrors(result.delivery);
+        throw new Error(detail || result.error || `Test failed (HTTP ${res.status})`);
       }
 
-      showToast('Test alert sent! Check Telegram and Notification History below.', 'success');
+      const detail = formatDeliveryErrors(result.delivery);
+      if (detail) {
+        showToast(`Test sent with warnings — ${detail}`, 'info');
+      } else {
+        showToast('Test alert sent! Check your enabled channels and Notification History below.', 'success');
+      }
       fetchDashboard();
     } catch (err) {
       showToast(err.message || 'Test alert failed', 'error');
+      fetchDashboard();
     } finally {
       setTesting(false);
     }
@@ -368,6 +393,7 @@ export default function DashboardPage() {
   }
 
   const isActive = data?.profile?.stripe_subscription_status === 'active';
+  const trialLabel = getSubscriptionTrialLabel();
 
   return (
     <div className="min-h-screen bg-vibe-bg">
@@ -412,7 +438,9 @@ export default function DashboardPage() {
             <p className="text-sm text-vibe-muted mt-1">
               {isActive
                 ? 'Your subscription is active. Manage payment method or cancel anytime.'
-                : 'Activate your subscription to receive form webhook alerts. Inactive accounts return 402 Payment Required.'}
+                : trialLabel
+                  ? `Start your ${trialLabel.toLowerCase()} to receive form webhook alerts. Card required; cancel before the trial ends to avoid charges.`
+                  : 'Activate your subscription to receive form webhook alerts. Inactive accounts return 402 Payment Required.'}
             </p>
           </div>
           {isActive ? (
@@ -431,7 +459,7 @@ export default function DashboardPage() {
               disabled={billingLoading}
               className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
             >
-              {billingLoading ? 'Redirecting…' : 'Subscribe'}
+              {billingLoading ? 'Redirecting…' : trialLabel ? 'Start free trial' : 'Subscribe'}
             </button>
           )}
         </section>

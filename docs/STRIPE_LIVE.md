@@ -90,6 +90,8 @@ In [Vercel → vibe-alerts → Settings → Environment Variables](https://verce
 | `STRIPE_SECRET_KEY` | Live secret or restricted key (`sk_live_...` or `rk_live_...`) |
 | `STRIPE_WEBHOOK_SECRET` | Live webhook signing secret (`whsec_...`) |
 | `STRIPE_PRICE_ID` | Live price ID (`price_...`) |
+| `STRIPE_TRIAL_PERIOD_DAYS` | `14` (optional — default is 14; set `0` to disable free trial) |
+| `NEXT_PUBLIC_SUBSCRIPTION_TRIAL_DAYS` | `14` (optional — keeps pricing page copy in sync) |
 
 Keep existing vars unchanged: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPPORT_EMAIL`, `NEXT_PUBLIC_SUBSCRIPTION_PRICE_LABEL`, Supabase, Telegram, etc.
 

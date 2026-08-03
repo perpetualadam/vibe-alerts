@@ -26,8 +26,8 @@ export default function TermsPage() {
           <h2>1. Service description</h2>
           <p>{ctx.serviceDescription}</p>
           <p>
-            An active paid subscription is required for webhook processing. Without an active subscription, incoming
-            webhook requests may receive HTTP 402 Payment Required.
+            An active subscription (including any free trial) is required for webhook processing. Without an active
+            subscription, incoming webhook requests may receive HTTP 402 Payment Required.
           </p>
         </section>
 
@@ -47,6 +47,13 @@ export default function TermsPage() {
             <Link href={ctx.pricingUrl}>pricing page</Link> ({ctx.priceLabel}) unless a different promotional price is
             clearly displayed at checkout.
           </p>
+          {ctx.trialLabel ? (
+            <p>
+              New subscriptions include a {ctx.trialLabel.toLowerCase()} with full access. A valid payment method is
+              required at signup. If you do not cancel before the trial ends, you authorize the first recurring charge at
+              the standard price shown at checkout.
+            </p>
+          ) : null}
           <p>
             Payments are processed by Stripe. By subscribing, you authorize recurring charges until you cancel. See our{' '}
             <Link href={ctx.refundsUrl}>Refunds &amp; Cancellations</Link> policy for cancellation and refund rules.

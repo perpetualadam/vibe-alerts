@@ -11,7 +11,7 @@ export const metadata = buildPageMetadata({
 });
 
 export default function PricingPage() {
-  const { siteName, priceLabel, supportEmail } = getLegalContext();
+  const { siteName, priceLabel, supportEmail, trialLabel } = getLegalContext();
 
   const included = [
     'Unlimited webhook endpoints per account (one URL per tenant)',
@@ -35,8 +35,19 @@ export default function PricingPage() {
         <article className="glass rounded-2xl p-8 space-y-6 border border-vibe-border">
           <div className="space-y-1">
             <p className="text-sm uppercase tracking-wider text-vibe-accent font-medium">VibeAlerts Pro</p>
-            <p className="text-4xl font-bold">{priceLabel}</p>
-            <p className="text-sm text-vibe-muted">Billed monthly. Cancel anytime from your dashboard.</p>
+            {trialLabel ? (
+              <>
+                <p className="text-4xl font-bold">{trialLabel}</p>
+                <p className="text-lg text-vibe-muted">Then {priceLabel}</p>
+              </>
+            ) : (
+              <p className="text-4xl font-bold">{priceLabel}</p>
+            )}
+            <p className="text-sm text-vibe-muted">
+              {trialLabel
+                ? 'Card required at signup. Cancel before the trial ends to avoid the first charge.'
+                : 'Billed monthly. Cancel anytime from your dashboard.'}
+            </p>
           </div>
           <ul className="space-y-2 text-sm text-vibe-muted">
             {included.map((item) => (
@@ -51,7 +62,7 @@ export default function PricingPage() {
               href="/login"
               className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white font-medium transition-colors"
             >
-              Create account &amp; subscribe
+              Create account{trialLabel ? ' & start trial' : ' & subscribe'}
             </Link>
             <Link
               href="/refunds"
