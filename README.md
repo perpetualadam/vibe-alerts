@@ -124,7 +124,7 @@ Built-in discoverability:
 
 Homepage includes FAQ + HowTo JSON-LD for answer engines (AEO).
 
-## Future Channels
+## Notification Channels
 
 All notification channels are implemented via the provider pattern in `lib/notifications/providers/`:
 
@@ -134,6 +134,7 @@ All notification channels are implemented via the provider pattern in `lib/notif
 | Email | Recipient email | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` |
 | WhatsApp | Phone number | `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` |
 | Slack | Incoming Webhook URL | — (per-tenant) |
+| Discord | Incoming Webhook URL | — (per-tenant) |
 | Microsoft Teams | Incoming Webhook URL | — (per-tenant) |
 
 Run migrations in order: `001` → `003` (003 supersedes 002) → `004` (security hardening).

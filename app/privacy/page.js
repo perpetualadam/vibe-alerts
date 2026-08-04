@@ -64,7 +64,7 @@ export default function PrivacyPage() {
             <li>Supabase (authentication and database hosting)</li>
             <li>Stripe (payments and subscription management)</li>
             <li>Vercel (application hosting)</li>
-            <li>Telegram, Resend, Slack, Microsoft Teams, or Meta (when you enable those channels)</li>
+            <li>Telegram, Resend, Slack, Discord, Microsoft Teams, or Meta (when you enable those channels)</li>
             <li>Google Analytics (optional, on public pages only when configured)</li>
           </ul>
           <p>Each processor handles data according to their own privacy policies.</p>
