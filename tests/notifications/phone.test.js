@@ -13,9 +13,18 @@ describe('phone helpers', () => {
     expect(isPhoneFieldKey('your-phone')).toBe(true);
     expect(isPhoneFieldKey('mobile')).toBe(true);
     expect(isPhoneFieldKey('telephone')).toBe(true);
+    expect(isPhoneFieldKey('mobile_phone')).toBe(true);
+    expect(isPhoneFieldKey('contact_phone')).toBe(true);
+    expect(isPhoneFieldKey('home_phone')).toBe(true);
+    expect(isPhoneFieldKey('work-phone')).toBe(true);
+    expect(isPhoneFieldKey('cell_phone')).toBe(true);
+    expect(isPhoneFieldKey('customer_phone_number')).toBe(true);
     expect(isPhoneFieldKey('name')).toBe(false);
     expect(isPhoneFieldKey('email')).toBe(false);
     expect(isPhoneFieldKey('order_id')).toBe(false);
+    expect(isPhoneFieldKey('mobile_app')).toBe(false);
+    expect(isPhoneFieldKey('phone_case')).toBe(false);
+    expect(isPhoneFieldKey('microphone')).toBe(false);
   });
 
   it('normalizes dialable values to tel: hrefs', () => {
