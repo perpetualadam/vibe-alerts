@@ -19,7 +19,7 @@ const features = [
     icon: '⚡',
     title: 'Instant mobile alerts',
     description:
-      'Leads land in Telegram in seconds. Also route to Email, Slack, Microsoft Teams, or WhatsApp.',
+      'Leads land in Telegram in seconds. Also route to Email, Slack, Discord, Microsoft Teams, or WhatsApp.',
   },
   {
     icon: '☁️',

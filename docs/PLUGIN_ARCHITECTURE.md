@@ -2,37 +2,40 @@
 
 VibeAlerts notification channels are **plugins** registered at startup.
 
+Built-in channels today: Telegram, Email, WhatsApp, Slack, Discord, and Microsoft Teams.
+Discord is a first-class webhook channel (same pattern as Slack/Teams) — enable it from the dashboard with an Incoming Webhook URL.
+
 ## Adding a New Channel
 
 ### 1. Implement the provider
 
 ```js
-// lib/notifications/providers/discord.js
+// lib/notifications/providers/sms.js
 import { NotificationProvider } from './base';
 
-export class DiscordProvider extends NotificationProvider {
-  static id = 'discord';
+export class SmsProvider extends NotificationProvider {
+  static id = 'sms';
   static version = '1.0.0';
-  static label = 'Discord';
-  static description = 'Discord webhook alerts';
+  static label = 'SMS';
+  static description = 'SMS alerts via your provider';
   static configSchema = [
-    { key: 'webhook_url', label: 'Webhook URL', type: 'url', required: true },
+    { key: 'to', label: 'Phone Number', type: 'tel', required: true },
   ];
-  static setupGuide = ['Create a Discord webhook in channel settings.'];
+  static setupGuide = ['Enter the phone number that should receive SMS alerts.'];
 
   validateConfig(config) { /* return { valid, config?, error? } */ }
   formatMessage(payload) { /* provider-owned formatting */ }
   async send(context) { /* use this.getConfig(context) */ }
 }
 
-export const discordPlugin = {
-  id: DiscordProvider.id,
-  version: DiscordProvider.version,
-  label: DiscordProvider.label,
-  description: DiscordProvider.description,
-  configSchema: DiscordProvider.configSchema,
-  setupGuide: DiscordProvider.setupGuide,
-  provider: new DiscordProvider(),
+export const smsPlugin = {
+  id: SmsProvider.id,
+  version: SmsProvider.version,
+  label: SmsProvider.label,
+  description: SmsProvider.description,
+  configSchema: SmsProvider.configSchema,
+  setupGuide: SmsProvider.setupGuide,
+  provider: new SmsProvider(),
 };
 ```
 
@@ -40,8 +43,8 @@ export const discordPlugin = {
 
 ```js
 // lib/notifications/plugins/index.js
-import { discordPlugin } from '../providers/discord';
-builtInPlugins.push(discordPlugin);
+import { smsPlugin } from '../providers/sms';
+builtInPlugins.push(smsPlugin);
 ```
 
 No database migration required — `channel_configs.channel` is free-form TEXT.
@@ -71,6 +74,7 @@ Webhook POST
 | `lib/notifications/registry.js` | `registerPlugin()`, `getPluginCatalog()` |
 | `lib/notifications/plugins/index.js` | Built-in plugin bootstrap |
 | `lib/notifications/providers/base.js` | Plugin contract |
+| `lib/notifications/providers/discord.js` | Discord Incoming Webhook provider |
 | `lib/channel-configs/db.js` | Generic `channel_configs` table |
 | `app/api/dashboard/plugins/route.js` | Client-safe plugin metadata |
 

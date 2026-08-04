@@ -16,7 +16,7 @@ export default function PricingPage() {
 
   const included = [
     'Unlimited webhook endpoints per account (one URL per tenant)',
-    'Telegram, Email, Slack, Microsoft Teams, and WhatsApp notifications',
+    'Telegram, Email, Slack, Discord, Microsoft Teams, and WhatsApp notifications',
     'Platform connectors for WordPress, Wix, Webflow, Shopify, Squarespace, Typeform, and Google Forms',
     'Dashboard for API keys, channel settings, and delivery history',
     'API key and HMAC webhook authentication with rate limiting',

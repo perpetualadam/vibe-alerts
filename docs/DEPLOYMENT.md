@@ -91,7 +91,7 @@ See **[STRIPE_LIVE.md](./STRIPE_LIVE.md)** for the full live-mode checklist (pro
 
 ### Optional — Email & WhatsApp channels (platform operator)
 
-Telegram, Slack, and Teams work out of the box for customers (Telegram uses your `TELEGRAM_BOT_TOKEN`; Slack/Teams use customer webhook URLs).
+Telegram, Slack, Discord, and Teams work out of the box for customers (Telegram uses your `TELEGRAM_BOT_TOKEN`; Slack/Discord/Teams use customer webhook URLs).
 
 **Email** and **WhatsApp** require extra credentials in **Vercel only** — customers never see or configure these:
 
