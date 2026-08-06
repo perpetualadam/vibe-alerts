@@ -106,6 +106,17 @@ Until set, the dashboard shows **Unavailable** for those channels with a support
 
 Run migration `008_integration_wizard.sql` so checklist progress persists per tenant. Merchants use **Dashboard → Setup Wizard** (`/dashboard/setup`) to pick a platform, copy credentials, follow tailored steps, and test the webhook connection before marking complete.
 
+### Optional — PWA & Web Push
+
+| Task | Details |
+|------|---------|
+| Migration | `009_push_subscriptions.sql` |
+| VAPID keys | `npx web-push generate-vapid-keys` → `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` |
+| Install | “Add to Home Screen” from the dashboard (HTTPS required) |
+| Enable push | Dashboard → Notifications → Push notifications |
+
+See **[PWA.md](./PWA.md)**.
+
 ### Phase 6 — SEO / AEO / LLMO verification
 
 | # | Task | URL to verify |

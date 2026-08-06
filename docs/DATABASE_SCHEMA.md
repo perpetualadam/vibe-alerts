@@ -73,6 +73,17 @@ registerPlugin({
 
 To add a new channel: implement a provider, call `registerPlugin()`, run no migration needed (channel is TEXT).
 
+## public.push_subscriptions (migration 009)
+
+Browser Web Push subscriptions for the PWA.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `user_id` | UUID FK | Tenant |
+| `endpoint` | TEXT, unique | PushService endpoint |
+| `p256dh` / `auth` | TEXT | Subscription keys |
+| `enabled` | BOOLEAN | Disabled on 404/410 from push service |
+
 ## public.integration_wizard_progress (migration 008)
 
 Website Integration Wizard checklist per tenant.

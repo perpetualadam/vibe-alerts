@@ -1,6 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import {
+  cacheNotificationLogs,
+  getCachedNotificationLogs,
+  logsCacheKey,
+} from '@/lib/pwa/offline-logs';
 
 const OUTCOMES = [
   { value: 'all', label: 'All statuses' },
@@ -53,30 +58,71 @@ export default function NotificationHistory({ providers = [] }) {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [offline, setOffline] = useState(false);
+  const [cachedAt, setCachedAt] = useState(null);
   const limit = 25;
 
   const load = useCallback(
     async (nextOffset = 0) => {
       setLoading(true);
       setError(null);
-      try {
-        const params = new URLSearchParams({
-          provider,
-          outcome,
-          limit: String(limit),
-          offset: String(nextOffset),
-        });
-        if (from) params.set('from', from);
-        if (to) params.set('to', to);
+      const params = new URLSearchParams({
+        provider,
+        outcome,
+        limit: String(limit),
+        offset: String(nextOffset),
+      });
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      const cacheKey = logsCacheKey(params);
 
-        const res = await fetch(`/api/dashboard/notifications/logs?${params}`);
+      try {
+        const res = await fetch(`/api/dashboard/notifications/logs?${params}`, {
+          credentials: 'same-origin',
+        });
         const json = await res.json();
-        if (!res.ok) throw new Error(json.error || 'Failed to load history');
+        const fromSwOffline = res.headers.get('x-vibealerts-offline') === '1' || json.offline;
+
+        if (!res.ok && !fromSwOffline) {
+          throw new Error(json.error || 'Failed to load history');
+        }
+
+        if (fromSwOffline && (!json.rows || json.rows.length === 0)) {
+          const cached = await getCachedNotificationLogs(cacheKey);
+          if (cached?.rows?.length) {
+            setRows(cached.rows);
+            setTotal(cached.total);
+            setOffset(nextOffset);
+            setOffline(true);
+            setCachedAt(cached.savedAt);
+            return;
+          }
+        }
+
         setRows(json.rows ?? []);
         setTotal(json.total ?? 0);
         setOffset(nextOffset);
+        setOffline(Boolean(fromSwOffline));
+        setCachedAt(null);
+
+        if (!fromSwOffline && res.ok) {
+          await cacheNotificationLogs(cacheKey, {
+            rows: json.rows ?? [],
+            total: json.total ?? 0,
+          });
+        }
       } catch (err) {
-        setError(err.message || 'Failed to load history');
+        const cached = await getCachedNotificationLogs(cacheKey);
+        if (cached?.rows) {
+          setRows(cached.rows);
+          setTotal(cached.total);
+          setOffset(nextOffset);
+          setOffline(true);
+          setCachedAt(cached.savedAt);
+          setError(null);
+        } else {
+          setError(err.message || 'Failed to load history');
+        }
       } finally {
         setLoading(false);
       }
@@ -98,6 +144,12 @@ export default function NotificationHistory({ providers = [] }) {
         <p className="text-sm text-vibe-muted mt-1">
           Delivery log across all providers. Filter by provider, outcome, and date.
         </p>
+        {offline && (
+          <p className="text-xs text-amber-300/90 mt-2 bg-amber-500/10 ring-1 ring-amber-500/20 rounded-lg px-3 py-2">
+            Showing cached logs{cachedAt ? ` from ${new Date(cachedAt).toLocaleString()}` : ''} —
+            you appear to be offline.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

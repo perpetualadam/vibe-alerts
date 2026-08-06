@@ -23,9 +23,10 @@ const LINKS = [
 ];
 
 /**
- * Secondary nav for dashboard sections — desktop tabs + mobile scroll chips.
+ * Secondary nav for dashboard sections — desktop tabs (phones use MobileBottomNav).
+ * @param {{ maxWidthClass?: string }} [props]
  */
-export default function DashboardNav() {
+export default function DashboardNav({ maxWidthClass = 'max-w-5xl' }) {
   const pathname = usePathname() || '/dashboard';
 
   return (
@@ -33,7 +34,7 @@ export default function DashboardNav() {
       aria-label="Dashboard sections"
       className="border-b border-vibe-border bg-vibe-bg/60"
     >
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      <div className={`${maxWidthClass} mx-auto px-4 sm:px-6`}>
         <ul className="flex gap-1 overflow-x-auto py-2 -mb-px scrollbar-none">
           {LINKS.map((link) => {
             const active = link.match(pathname);

@@ -47,6 +47,17 @@ lib/
 supabase/migrations/                # Database schema + RLS
 ```
 
+## Mobile dashboard & PWA
+
+The dashboard is mobile-first with:
+
+- Responsive layouts + bottom tab navigation on phones
+- Progressive Web App (`app/manifest.js`, `public/sw.js`) — installable, offline shell
+- Web Push notifications (VAPID) when leads arrive
+- Offline caching for notification history (Cache API + IndexedDB)
+
+Run migration `009_push_subscriptions.sql` and set `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` (see `.env.example`). Enable push from **Notifications → Push notifications**.
+
 ## Website Integration Wizard
 
 Guided setup at **`/dashboard/setup`**:
