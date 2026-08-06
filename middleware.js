@@ -3,6 +3,18 @@ import { NextResponse } from 'next/server';
 import { applySecurityHeaders } from '@/lib/security/headers';
 
 export async function middleware(request) {
+  const pathname = request.nextUrl.pathname;
+
+  // Skip session work for PWA/static assets (faster mobile loads)
+  if (
+    pathname === '/sw.js' ||
+    pathname.startsWith('/icons/') ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/offline'
+  ) {
+    return applySecurityHeaders(NextResponse.next({ request }));
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -27,7 +39,6 @@ export async function middleware(request) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const pathname = request.nextUrl.pathname;
   const isDashboard = pathname.startsWith('/dashboard');
   const isLoginRoot = pathname === '/login' || pathname === '/login/';
 

@@ -5,27 +5,10 @@ import { useCallback, useEffect, useState } from 'react';
 import ChannelSettings, {
   isAnyChannelConfiguredFromCatalog,
 } from '@/components/dashboard/ChannelSettings';
-import DashboardNav from '@/components/dashboard/DashboardNav';
+import DashboardShell from '@/components/dashboard/DashboardShell';
 import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
 import { dashboardMutationHeaders } from '@/lib/security/client-headers';
-import { createClient } from '@/lib/supabase/client';
 import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
-import { SITE } from '@/lib/seo/site';
-
-function StatusBadge({ active }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
-        active
-          ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/30'
-          : 'bg-red-500/10 text-red-400 ring-1 ring-red-500/30'
-      }`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-emerald-400' : 'bg-red-400'}`} />
-      {active ? 'Active' : 'Inactive'}
-    </span>
-  );
-}
 
 function HealthIndicator({ plugins, channelConfigs, settings, events, profile }) {
   const channelsOk = isAnyChannelConfiguredFromCatalog(plugins, channelConfigs);
@@ -189,17 +172,9 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [apiKey, setApiKey] = useState(null);
   const [showApiKey, setShowApiKey] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
   const [billingLoading, setBillingLoading] = useState(false);
 
-  const supabase = createClient();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || '';
-
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    await supabase.auth.signOut();
-    window.location.href = '/login';
-  };
 
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
@@ -392,192 +367,157 @@ export default function DashboardPage() {
   const trialLabel = getSubscriptionTrialLabel();
 
   return (
-    <div className="min-h-screen bg-vibe-bg">
-      {toast && (
-        <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-lg ${
-            toast.type === 'error'
-              ? 'bg-red-500/90 text-white'
-              : toast.type === 'success'
-                ? 'bg-emerald-500/90 text-white'
-                : 'bg-vibe-surface text-white ring-1 ring-vibe-border'
-          }`}
+    <DashboardShell
+      title="Dashboard"
+      email={data?.profile?.email}
+      isActive={isActive}
+      toast={toast}
+    >
+      <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold">Billing</h2>
+          <p className="text-sm text-vibe-muted mt-1">
+            {isActive
+              ? 'Your subscription is active. Manage payment method or cancel anytime.'
+              : trialLabel
+                ? `Start your ${trialLabel.toLowerCase()} to receive form webhook alerts. Card required; cancel before the trial ends to avoid charges.`
+                : 'Activate your subscription to receive form webhook alerts. Inactive accounts return 402 Payment Required.'}
+          </p>
+        </div>
+        {isActive ? (
+          <button
+            type="button"
+            onClick={openBillingPortal}
+            disabled={billingLoading}
+            className="px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+          >
+            {billingLoading ? 'Opening…' : 'Manage billing'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={startCheckout}
+            disabled={billingLoading}
+            className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+          >
+            {billingLoading ? 'Redirecting…' : trialLabel ? 'Start free trial' : 'Subscribe'}
+          </button>
+        )}
+      </section>
+
+      <HealthIndicator
+        plugins={plugins}
+        channelConfigs={data?.channelConfigs}
+        settings={data?.settings}
+        events={data?.webhookEvents}
+        profile={data?.profile}
+      />
+
+      <section className="glass rounded-xl p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Your Webhook URL</h2>
+          <button
+            onClick={regenerateToken}
+            disabled={regenerating}
+            className="text-xs text-vibe-muted hover:text-white transition-colors disabled:opacity-50"
+          >
+            {regenerating ? 'Regenerating…' : 'Regenerate URL'}
+          </button>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <code className="flex-1 bg-black/40 rounded-lg px-3 sm:px-4 py-3 text-xs sm:text-sm font-mono text-vibe-accent break-all">
+            {webhookUrl}
+          </code>
+          <button
+            onClick={async () => {
+              await navigator.clipboard.writeText(webhookUrl);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="px-4 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap"
+          >
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        <div className="flex items-center gap-3 pt-2">
+          <span className="text-sm text-vibe-muted">API Key:</span>
+          <code className="flex-1 bg-black/40 rounded-lg px-3 py-2 text-sm font-mono break-all">
+            {showApiKey && apiKey ? apiKey : '••••••••••••••••'}
+          </code>
+          <button
+            type="button"
+            onClick={revealApiKey}
+            className="text-xs text-vibe-muted hover:text-white transition-colors whitespace-nowrap"
+          >
+            {showApiKey ? 'Hide' : 'Reveal'}
+          </button>
+        </div>
+      </section>
+
+      <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold">Website Integration Wizard</h2>
+          <p className="text-sm text-vibe-muted mt-1">
+            Choose WordPress, Shopify, Google Forms, Wix, Squarespace, Webflow, or Custom — get
+            tailored steps, test the connection, and track progress with a checklist.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/setup"
+          className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
         >
-          {toast.message}
-        </div>
-      )}
+          Open Setup Wizard
+        </Link>
+      </section>
 
-      <header className="border-b border-vibe-border bg-vibe-bg/80 backdrop-blur-lg sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between gap-4">
-          <div>
-            <Link href="/" className="text-sm text-vibe-muted hover:text-white transition-colors">
-              ← {SITE.name}
-            </Link>
-            <h1 className="text-xl font-bold mt-1">Dashboard</h1>
-            <p className="text-sm text-vibe-muted truncate max-w-[240px] sm:max-w-none">{data?.profile?.email}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <StatusBadge active={isActive} />
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="text-xs text-vibe-muted hover:text-white transition-colors disabled:opacity-50"
-            >
-              {loggingOut ? 'Signing out…' : 'Sign out'}
-            </button>
-          </div>
-        </div>
-        <DashboardNav />
-      </header>
+      <PlatformIntegrations
+        webhookToken={data?.profile?.webhook_token}
+        apiKey={showApiKey ? apiKey : null}
+      />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <section className="grid sm:grid-cols-2 gap-4">
+        <div className="glass rounded-xl p-6 flex flex-col justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">Billing</h2>
+            <h2 className="text-lg font-semibold">Notification providers</h2>
             <p className="text-sm text-vibe-muted mt-1">
-              {isActive
-                ? 'Your subscription is active. Manage payment method or cancel anytime.'
-                : trialLabel
-                  ? `Start your ${trialLabel.toLowerCase()} to receive form webhook alerts. Card required; cancel before the trial ends to avoid charges.`
-                  : 'Activate your subscription to receive form webhook alerts. Inactive accounts return 402 Payment Required.'}
-            </p>
-          </div>
-          {isActive ? (
-            <button
-              type="button"
-              onClick={openBillingPortal}
-              disabled={billingLoading}
-              className="px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
-            >
-              {billingLoading ? 'Opening…' : 'Manage billing'}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={startCheckout}
-              disabled={billingLoading}
-              className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
-            >
-              {billingLoading ? 'Redirecting…' : trialLabel ? 'Start free trial' : 'Subscribe'}
-            </button>
-          )}
-        </section>
-
-        <HealthIndicator
-          plugins={plugins}
-          channelConfigs={data?.channelConfigs}
-          settings={data?.settings}
-          events={data?.webhookEvents}
-          profile={data?.profile}
-        />
-
-        <section className="glass rounded-xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Your Webhook URL</h2>
-            <button
-              onClick={regenerateToken}
-              disabled={regenerating}
-              className="text-xs text-vibe-muted hover:text-white transition-colors disabled:opacity-50"
-            >
-              {regenerating ? 'Regenerating…' : 'Regenerate URL'}
-            </button>
-          </div>
-          <div className="flex gap-2">
-            <code className="flex-1 bg-black/40 rounded-lg px-4 py-3 text-sm font-mono text-vibe-accent break-all">
-              {webhookUrl}
-            </code>
-            <button
-              onClick={async () => {
-                await navigator.clipboard.writeText(webhookUrl);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-              }}
-              className="px-4 py-2 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap"
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-          <div className="flex items-center gap-3 pt-2">
-            <span className="text-sm text-vibe-muted">API Key:</span>
-            <code className="flex-1 bg-black/40 rounded-lg px-3 py-2 text-sm font-mono break-all">
-              {showApiKey && apiKey ? apiKey : '••••••••••••••••'}
-            </code>
-            <button
-              type="button"
-              onClick={revealApiKey}
-              className="text-xs text-vibe-muted hover:text-white transition-colors whitespace-nowrap"
-            >
-              {showApiKey ? 'Hide' : 'Reveal'}
-            </button>
-          </div>
-        </section>
-
-        <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold">Website Integration Wizard</h2>
-            <p className="text-sm text-vibe-muted mt-1">
-              Choose WordPress, Shopify, Google Forms, Wix, Squarespace, Webflow, or Custom — get
-              tailored steps, test the connection, and track progress with a checklist.
+              Manage Telegram, Discord, Email, Teams, WhatsApp, and more — connection status,
+              health, test sends, and delivery history.
             </p>
           </div>
           <Link
-            href="/dashboard/setup"
+            href="/dashboard/notifications"
             className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
           >
-            Open Setup Wizard
+            Open Notifications
           </Link>
-        </section>
-
-        <PlatformIntegrations
-          webhookToken={data?.profile?.webhook_token}
-          apiKey={showApiKey ? apiKey : null}
-        />
-
-        <section className="grid sm:grid-cols-2 gap-4">
-          <div className="glass rounded-xl p-6 flex flex-col justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-semibold">Notification providers</h2>
-              <p className="text-sm text-vibe-muted mt-1">
-                Manage Telegram, Discord, Email, Teams, WhatsApp, and more — connection status,
-                health, test sends, and delivery history.
-              </p>
-            </div>
-            <Link
-              href="/dashboard/notifications"
-              className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
-            >
-              Open Notifications
-            </Link>
+        </div>
+        <div className="glass rounded-xl p-6 flex flex-col justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">Analytics</h2>
+            <p className="text-sm text-vibe-muted mt-1">
+              Webhooks, delivery success rates, latency, sources, and spam detection stats
+              with date filters and CSV export.
+            </p>
           </div>
-          <div className="glass rounded-xl p-6 flex flex-col justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-semibold">Analytics</h2>
-              <p className="text-sm text-vibe-muted mt-1">
-                Webhooks, delivery success rates, latency, sources, and spam detection stats
-                with date filters and CSV export.
-              </p>
-            </div>
-            <Link
-              href="/dashboard/analytics"
-              className="px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors whitespace-nowrap text-center"
-            >
-              Open Analytics
-            </Link>
-          </div>
-        </section>
+          <Link
+            href="/dashboard/analytics"
+            className="px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors whitespace-nowrap text-center"
+          >
+            Open Analytics
+          </Link>
+        </div>
+      </section>
 
-        <ChannelSettings
-          plugins={plugins}
-          channelConfigs={data?.channelConfigs}
-          onSave={saveChannelSettings}
-          onTest={sendTestAlert}
-          testing={testing}
-          isActive={isActive}
-        />
+      <ChannelSettings
+        plugins={plugins}
+        channelConfigs={data?.channelConfigs}
+        onSave={saveChannelSettings}
+        onTest={sendTestAlert}
+        testing={testing}
+        isActive={isActive}
+      />
 
-        <ActivityFeed events={data?.webhookEvents} logs={data?.notificationLogs} />
-      </main>
-    </div>
+      <ActivityFeed events={data?.webhookEvents} logs={data?.notificationLogs} />
+    </DashboardShell>
   );
 }
