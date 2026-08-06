@@ -47,6 +47,17 @@ lib/
 supabase/migrations/                # Database schema + RLS
 ```
 
+## WordPress Plugin
+
+Native plugin under `integrations/wordpress/vibealerts/`:
+
+```bash
+npm run package:wordpress
+# Upload integrations/wordpress/dist/vibealerts.zip via Plugins → Add New → Upload Plugin
+```
+
+Connect with your dashboard Webhook URL + API Key. Auto-detects Contact Form 7, WPForms, Gravity Forms, Fluent Forms, and Elementor Forms — no per-form webhook setup. Includes **Send Test Alert** in Settings → VibeAlerts.
+
 ## Webhook Integration (Any Website)
 
 **Endpoint:** `POST {APP_URL}/api/v1/webhook/{webhook_token}`

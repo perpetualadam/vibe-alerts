@@ -1,0 +1,78 @@
+.vibealerts-wrap {
+  max-width: 920px;
+}
+
+.vibealerts-status-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.vibealerts-card {
+  background: #fff;
+  border: 1px solid #dcdcde;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.vibealerts-card h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.vibealerts-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.vibealerts-badge.is-ok {
+  background: #edfaef;
+  color: #007a3d;
+}
+
+.vibealerts-badge.is-warn {
+  background: #fcf0e3;
+  color: #9a5b00;
+}
+
+.vibealerts-badge.is-muted {
+  background: #f0f0f1;
+  color: #646970;
+}
+
+.vibealerts-detected-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vibealerts-bridge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.vibealerts-test-status {
+  margin-left: 10px;
+  font-weight: 500;
+}
+
+.vibealerts-test-status.is-ok {
+  color: #007a3d;
+}
+
+.vibealerts-test-status.is-error {
+  color: #b32d2e;
+}
