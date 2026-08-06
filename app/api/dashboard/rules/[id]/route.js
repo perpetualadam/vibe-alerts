@@ -12,7 +12,8 @@ export async function PATCH(request, { params }) {
   const auth = await requireDashboardUser(request, { csrf: true });
   if (auth.error) return auth.error;
 
-  const ruleId = String(params?.id || '').trim();
+  const resolved = await params;
+  const ruleId = String(resolved?.id || '').trim();
   if (!ruleId) {
     return NextResponse.json({ error: 'Rule id required' }, { status: 400 });
   }
