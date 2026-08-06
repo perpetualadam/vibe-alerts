@@ -57,6 +57,35 @@ describe('WordPressIntegration', () => {
     expect(result.form_id).toBe('7');
     expect(result.source).toBe('gravity_forms');
   });
+
+  it('normalizes Fluent Forms field bags', () => {
+    const result = wp.normalizePayload({
+      form_id: '3',
+      form_title: 'Lead',
+      fields: { email: 'f@test.com', names: 'Sam' },
+      _vibealerts_source: 'fluent-forms',
+    });
+    expect(result.email).toBe('f@test.com');
+    expect(result.names).toBe('Sam');
+    expect(result.source).toBe('fluent_forms');
+  });
+
+  it('normalizes Elementor Forms field bags', () => {
+    const result = wp.normalizePayload({
+      form_id: 'abc',
+      fields: { Name: 'Pat', Email: 'p@test.com' },
+      _vibealerts_source: 'elementor-forms',
+    });
+    expect(result.Name).toBe('Pat');
+    expect(result.Email).toBe('p@test.com');
+    expect(result.source).toBe('elementor_forms');
+  });
+
+  it('exposes native plugin install path in setup metadata', () => {
+    expect(WordPressIntegration.setupSteps.join(' ')).toMatch(/Upload Plugin/i);
+    expect(WordPressIntegration.description).toMatch(/Fluent Forms/i);
+    expect(WordPressIntegration.description).toMatch(/Elementor/i);
+  });
 });
 
 describe('Platform detection header', () => {
