@@ -72,3 +72,18 @@ registerPlugin({
 ```
 
 To add a new channel: implement a provider, call `registerPlugin()`, run no migration needed (channel is TEXT).
+
+## public.integration_wizard_progress (migration 008)
+
+Website Integration Wizard checklist per tenant.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `user_id` | UUID PK | References `profiles` |
+| `platform` | TEXT | Wizard id (`wordpress`, `custom`, …) |
+| `steps` | JSONB | `{ platform, credentials, instructions, test, complete }` |
+| `last_test_status` | TEXT | `passed` / `failed` |
+| `last_test_event_id` | UUID | Related `webhook_events` row |
+| `completed_at` | TIMESTAMPTZ | Set when wizard is marked complete |
+
+RLS: users can select/insert/update their own row.

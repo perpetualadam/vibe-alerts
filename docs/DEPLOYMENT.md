@@ -102,6 +102,10 @@ Telegram, Slack, Discord, and Teams work out of the box for customers (Telegram 
 
 Until set, the dashboard shows **Unavailable** for those channels with a support email link — not internal env var names.
 
+### Optional — Website Integration Wizard
+
+Run migration `008_integration_wizard.sql` so checklist progress persists per tenant. Merchants use **Dashboard → Setup Wizard** (`/dashboard/setup`) to pick a platform, copy credentials, follow tailored steps, and test the webhook connection before marking complete.
+
 ### Phase 6 — SEO / AEO / LLMO verification
 
 | # | Task | URL to verify |
