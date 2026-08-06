@@ -6,6 +6,7 @@ import ChannelSettings, {
   isAnyChannelConfiguredFromCatalog,
 } from '@/components/dashboard/ChannelSettings';
 import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
+import WhatsAppConnection from '@/components/dashboard/WhatsAppConnection';
 import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 import { createClient } from '@/lib/supabase/client';
 import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
@@ -305,6 +306,32 @@ export default function DashboardPage() {
     showToast('Channel settings saved', 'success');
   };
 
+  const applyWhatsAppUpdate = (payload) => {
+    setData((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev };
+      if (payload?.connection) {
+        next.whatsapp = {
+          ...(prev.whatsapp ?? {}),
+          connection: payload.connection,
+          platformReady: prev.whatsapp?.platformReady ?? true,
+          encryptionReady: prev.whatsapp?.encryptionReady ?? true,
+        };
+      }
+      if (payload?.channel) {
+        next.channelConfigs = {
+          ...prev.channelConfigs,
+          whatsapp: {
+            enabled: payload.channel.enabled,
+            config: payload.channel.config,
+            connected_at: payload.channel.connected_at,
+          },
+        };
+      }
+      return next;
+    });
+  };
+
   const sendTestAlert = async () => {
     if (!data?.profile?.webhook_token) return;
     setTesting(true);
@@ -521,6 +548,15 @@ export default function DashboardPage() {
         <PlatformIntegrations
           webhookToken={data?.profile?.webhook_token}
           apiKey={showApiKey ? apiKey : null}
+        />
+
+        <WhatsAppConnection
+          status={data?.whatsapp}
+          recipientPhone={data?.channelConfigs?.whatsapp?.config?.phone}
+          channelEnabled={Boolean(data?.channelConfigs?.whatsapp?.enabled)}
+          onUpdated={applyWhatsAppUpdate}
+          onToast={showToast}
+          isActive={isActive}
         />
 
         <ChannelSettings

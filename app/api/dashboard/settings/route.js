@@ -44,6 +44,19 @@ export async function PATCH(request) {
       ? { ...(existing?.config ?? {}), ...config }
       : (existing?.config ?? {});
 
+  // Never accept WhatsApp secrets through the generic settings endpoint.
+  if (channel === 'whatsapp') {
+    delete mergedConfig.access_token;
+    delete mergedConfig.accessToken;
+    delete mergedConfig.waba_id;
+    delete mergedConfig.wabaId;
+    delete mergedConfig.phone_number_id;
+    delete mergedConfig.phoneNumberId;
+    if (existing?.config?.whatsapp_connected != null && mergedConfig.whatsapp_connected == null) {
+      mergedConfig.whatsapp_connected = existing.config.whatsapp_connected;
+    }
+  }
+
   if (config !== undefined && nextEnabled) {
     const hasValues = Object.values(mergedConfig).some((v) => String(v ?? '').trim());
     if (hasValues) {
@@ -55,7 +68,12 @@ export async function PATCH(request) {
   }
 
   const validation = validatePluginConfig(channel, mergedConfig);
-  const sanitizedConfig = validation.config ?? mergedConfig;
+  const sanitizedConfig = {
+    ...(validation.config ?? mergedConfig),
+    ...(channel === 'whatsapp' && mergedConfig.whatsapp_connected != null
+      ? { whatsapp_connected: Boolean(mergedConfig.whatsapp_connected) }
+      : {}),
+  };
 
   try {
     const row = await upsertChannelConfig(supabase, {

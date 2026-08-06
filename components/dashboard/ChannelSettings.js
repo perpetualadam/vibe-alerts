@@ -43,10 +43,19 @@ export default function ChannelSettings({
     const entry = channelConfigs?.[plugin.id];
     if (!entry?.enabled) return false;
     if (!entry?.config) return false;
-    return plugin.configSchema.every((field) => {
+    const fieldsOk = plugin.configSchema.every((field) => {
       if (!field.required) return true;
       return Boolean(String(entry.config[field.key] ?? '').trim());
     });
+    if (!fieldsOk) return false;
+    // WhatsApp also requires a connected Meta Business account (per-tenant).
+    if (plugin.id === 'whatsapp') {
+      return (
+        entry.config.whatsapp_connected === true ||
+        entry.config.whatsapp_connected === 'true'
+      );
+    }
+    return true;
   };
 
   const anyConfigured = plugins?.some(isPluginConfigured) ?? false;
@@ -234,9 +243,17 @@ export function isAnyChannelConfiguredFromCatalog(plugins, channelConfigs) {
     if (plugin.platformReady === false) return false;
     const entry = channelConfigs[plugin.id];
     if (!entry?.enabled) return false;
-    return plugin.configSchema.every((field) => {
+    const fieldsOk = plugin.configSchema.every((field) => {
       if (!field.required) return true;
       return Boolean(String(entry.config?.[field.key] ?? '').trim());
     });
+    if (!fieldsOk) return false;
+    if (plugin.id === 'whatsapp') {
+      return (
+        entry.config?.whatsapp_connected === true ||
+        entry.config?.whatsapp_connected === 'true'
+      );
+    }
+    return true;
   });
 }

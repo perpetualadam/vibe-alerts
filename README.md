@@ -93,7 +93,7 @@ fetch("https://vibe-alerts.com/api/v1/webhook/YOUR-TOKEN", {
 - RLS on all user tables
 - Server-only secrets never exposed to client
 
-Run migrations in order: `001` → `003` → `004`.
+Run migrations in order: `001` → `003` → `004` → `005`.
 
 ## Deployment (Vercel + Cloudflare)
 
@@ -107,7 +107,7 @@ See **[docs/CLOUDFLARE.md](docs/CLOUDFLARE.md)** for Cloudflare WAF, cache, webh
 2. Set env vars from `.env.example`
 3. Connect domain via Cloudflare DNS
 4. Set `NEXT_PUBLIC_APP_URL=https://yourdomain.com`
-5. Run Supabase migrations `001` → `003` → `004`
+5. Run Supabase migrations `001` → `003` → `004` → `005`
 6. Verify: `/api/health`, `/sitemap.xml`, `/llms.txt`
 
 ## SEO / AEO / LLMO
@@ -132,12 +132,24 @@ All notification channels are implemented via the provider pattern in `lib/notif
 |---------|-------------------|-----------------|
 | Telegram | Chat ID | `TELEGRAM_BOT_TOKEN` |
 | Email | Recipient email | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` |
-| WhatsApp | Phone number | `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` |
+| WhatsApp | Recipient phone + Connect WABA | `CREDENTIALS_ENCRYPTION_KEY` (per-tenant tokens); optional legacy `WHATSAPP_ACCESS_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID` |
 | Slack | Incoming Webhook URL | — (per-tenant) |
 | Discord | Incoming Webhook URL | — (per-tenant) |
 | Microsoft Teams | Incoming Webhook URL | — (per-tenant) |
 
-Run migrations in order: `001` → `003` (003 supersedes 002) → `004` (security hardening).
+Run migrations in order: `001` → `003` (003 supersedes 002) → `004` (security hardening) → `005` (WhatsApp connections).
+
+### WhatsApp Business (Meta Cloud API)
+
+Each customer connects their own WhatsApp Business account from the dashboard:
+
+1. Set `CREDENTIALS_ENCRYPTION_KEY` (`openssl rand -hex 32`)
+2. Run migration `005_whatsapp_connections.sql`
+3. In the dashboard **WhatsApp Business** panel: enter WABA ID, Phone Number ID, and Access Token → **Connect WhatsApp**
+4. Enable the WhatsApp channel independently and set the alert recipient phone
+5. Use **Send Test Message** to verify delivery
+
+API routes: `POST /api/dashboard/whatsapp/connect`, `POST /api/dashboard/whatsapp/disconnect`, `POST /api/dashboard/whatsapp/test`, `GET /api/dashboard/whatsapp`.
 
 ## License
 

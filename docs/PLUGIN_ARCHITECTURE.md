@@ -5,6 +5,8 @@ VibeAlerts notification channels are **plugins** registered at startup.
 Built-in channels today: Telegram, Email, WhatsApp, Slack, Discord, and Microsoft Teams.
 Discord is a first-class webhook channel (same pattern as Slack/Teams) — enable it from the dashboard with an Incoming Webhook URL.
 
+WhatsApp uses the official Meta Cloud API with **per-tenant** credentials (WABA ID, Phone Number ID, encrypted access token) stored in `whatsapp_connections`. See migration `005_whatsapp_connections.sql` and `lib/whatsapp/`.
+
 ## Adding a New Channel
 
 ### 1. Implement the provider
