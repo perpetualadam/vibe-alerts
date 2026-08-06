@@ -220,22 +220,6 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startCheckout = async () => {
-    setBillingLoading(true);
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: dashboardMutationHeaders(),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Could not start checkout');
-      window.location.href = json.url;
-    } catch (err) {
-      showToast(err.message || 'Could not start checkout', 'error');
-      setBillingLoading(false);
-    }
-  };
-
   const openBillingPortal = async () => {
     setBillingLoading(true);
     try {
@@ -378,31 +362,30 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold">Billing</h2>
           <p className="text-sm text-vibe-muted mt-1">
             {isActive
-              ? 'Your subscription is active. Manage payment method or cancel anytime.'
+              ? 'Manage plans, usage, invoices, promo codes, and team seats.'
               : trialLabel
-                ? `Start your ${trialLabel.toLowerCase()} to receive form webhook alerts. Card required; cancel before the trial ends to avoid charges.`
-                : 'Activate your subscription to receive form webhook alerts. Inactive accounts return 402 Payment Required.'}
+                ? `Start your ${trialLabel.toLowerCase()} — monthly or annual plans with promo codes.`
+                : 'Activate a plan to receive form webhook alerts. Inactive accounts return 402 Payment Required.'}
           </p>
         </div>
-        {isActive ? (
-          <button
-            type="button"
-            onClick={openBillingPortal}
-            disabled={billingLoading}
-            className="px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Link
+            href="/dashboard/billing"
+            className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
           >
-            {billingLoading ? 'Opening…' : 'Manage billing'}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={startCheckout}
-            disabled={billingLoading}
-            className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
-          >
-            {billingLoading ? 'Redirecting…' : trialLabel ? 'Start free trial' : 'Subscribe'}
-          </button>
-        )}
+            {isActive ? 'Open billing' : trialLabel ? 'Start free trial' : 'View plans'}
+          </Link>
+          {isActive && (
+            <button
+              type="button"
+              onClick={openBillingPortal}
+              disabled={billingLoading}
+              className="px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+            >
+              {billingLoading ? 'Opening…' : 'Customer Portal'}
+            </button>
+          )}
+        </div>
       </section>
 
       <HealthIndicator

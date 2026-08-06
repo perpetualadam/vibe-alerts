@@ -27,7 +27,7 @@ if (mode === 'test' && process.argv.includes('--require-live')) {
 
 const stripe = new Stripe(key);
 
-const APP_URL = 'https://vibe-alerts.com';
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://vibe-alerts.com').replace(/\/$/, '');
 const WEBHOOK_EVENTS = [
   'checkout.session.completed',
   'checkout.session.async_payment_failed',
@@ -37,36 +37,73 @@ const WEBHOOK_EVENTS = [
   'customer.subscription.deleted',
 ];
 
-let product = (await stripe.products.list({ limit: 20, active: true })).data.find(
-  (p) => p.name === 'VibeAlerts'
-);
+const CATALOG = [
+  {
+    name: 'VibeAlerts Starter',
+    description: 'Solo webhook alerts with a monthly allowance.',
+    prices: [
+      { nickname: 'Starter Monthly', interval: 'month', unit_amount: 900, env: 'STRIPE_PRICE_STARTER_MONTHLY' },
+      { nickname: 'Starter Yearly', interval: 'year', unit_amount: 9000, env: 'STRIPE_PRICE_STARTER_YEARLY' },
+    ],
+  },
+  {
+    name: 'VibeAlerts Pro',
+    description: 'Higher limits, team seats, and usage-based overage.',
+    prices: [
+      { nickname: 'Pro Monthly', interval: 'month', unit_amount: 1500, env: 'STRIPE_PRICE_PRO_MONTHLY' },
+      { nickname: 'Pro Yearly', interval: 'year', unit_amount: 15000, env: 'STRIPE_PRICE_PRO_YEARLY' },
+    ],
+  },
+];
 
-if (!product) {
-  product = await stripe.products.create({
-    name: 'VibeAlerts',
-    description: 'Website form submissions routed to Telegram, Email, Slack, and more.',
-  });
-  console.log('CREATED_PRODUCT', product.id);
-} else {
-  console.log('EXISTING_PRODUCT', product.id);
-}
+/** @type {Record<string, string>} */
+const createdPrices = {};
 
-let price = (
-  await stripe.prices.list({ product: product.id, active: true, limit: 20 })
-).data.find((p) => p.type === 'recurring' && p.recurring?.interval === 'month');
+for (const item of CATALOG) {
+  let product = (await stripe.products.list({ limit: 50, active: true })).data.find(
+    (p) => p.name === item.name
+  );
+  if (!product) {
+    product = await stripe.products.create({
+      name: item.name,
+      description: item.description,
+    });
+    console.log('CREATED_PRODUCT', product.id, item.name);
+  } else {
+    console.log('EXISTING_PRODUCT', product.id, item.name);
+  }
 
-if (!price) {
-  price = await stripe.prices.create({
+  const existingPrices = await stripe.prices.list({
     product: product.id,
-    currency: 'usd',
-    unit_amount: 1500,
-    recurring: { interval: 'month' },
-    nickname: 'VibeAlerts Monthly',
+    active: true,
+    limit: 20,
   });
-  console.log('CREATED_PRICE', price.id);
-} else {
-  console.log('EXISTING_PRICE', price.id);
+
+  for (const priceDef of item.prices) {
+    let price = existingPrices.data.find(
+      (p) =>
+        p.type === 'recurring' &&
+        p.recurring?.interval === priceDef.interval &&
+        p.unit_amount === priceDef.unit_amount
+    );
+    if (!price) {
+      price = await stripe.prices.create({
+        product: product.id,
+        currency: 'usd',
+        unit_amount: priceDef.unit_amount,
+        recurring: { interval: priceDef.interval },
+        nickname: priceDef.nickname,
+      });
+      console.log('CREATED_PRICE', price.id, priceDef.nickname);
+    } else {
+      console.log('EXISTING_PRICE', price.id, priceDef.nickname);
+    }
+    createdPrices[priceDef.env] = price.id;
+  }
 }
+
+// Legacy alias
+createdPrices.STRIPE_PRICE_ID = createdPrices.STRIPE_PRICE_PRO_MONTHLY;
 
 const webhookUrl = `${APP_URL}/api/stripe/webhook`;
 const webhooks = await stripe.webhookEndpoints.list({ limit: 20 });
@@ -89,7 +126,15 @@ if (!webhook) {
   console.log('UPDATED_WEBHOOK_EVENTS', updated.enabled_events.join(', '));
 }
 
-const portalConfigs = await stripe.billingPortal.configurations.list({ limit: 1 });
+const products = Object.values(createdPrices);
+const portalConfigs = await stripe.billingPortal.configurations.list({ limit: 5 });
+const priceIds = [
+  createdPrices.STRIPE_PRICE_STARTER_MONTHLY,
+  createdPrices.STRIPE_PRICE_STARTER_YEARLY,
+  createdPrices.STRIPE_PRICE_PRO_MONTHLY,
+  createdPrices.STRIPE_PRICE_PRO_YEARLY,
+].filter(Boolean);
+
 if (!portalConfigs.data.length) {
   const config = await stripe.billingPortal.configurations.create({
     business_profile: {
@@ -100,11 +145,40 @@ if (!portalConfigs.data.length) {
       invoice_history: { enabled: true },
       payment_method_update: { enabled: true },
       subscription_cancel: { enabled: true, mode: 'at_period_end' },
+      subscription_update: {
+        enabled: true,
+        default_allowed_updates: ['price'],
+        proration_behavior: 'create_prorations',
+        products: [
+          {
+            product: (
+              await stripe.prices.retrieve(createdPrices.STRIPE_PRICE_STARTER_MONTHLY)
+            ).product,
+            prices: [
+              createdPrices.STRIPE_PRICE_STARTER_MONTHLY,
+              createdPrices.STRIPE_PRICE_STARTER_YEARLY,
+            ],
+          },
+          {
+            product: (await stripe.prices.retrieve(createdPrices.STRIPE_PRICE_PRO_MONTHLY)).product,
+            prices: [
+              createdPrices.STRIPE_PRICE_PRO_MONTHLY,
+              createdPrices.STRIPE_PRICE_PRO_YEARLY,
+            ],
+          },
+        ],
+      },
     },
   });
   console.log('CREATED_PORTAL_CONFIG', config.id);
 } else {
   console.log('EXISTING_PORTAL_CONFIG', portalConfigs.data[0].id);
+  console.log('NOTE: Update portal products in Stripe Dashboard if upgrading an old config.');
 }
 
-console.log('STRIPE_PRICE_ID', price.id);
+console.log('\nAdd these to Vercel / .env.local:');
+for (const [envKey, id] of Object.entries(createdPrices)) {
+  console.log(`${envKey}=${id}`);
+}
+void products;
+void priceIds;
