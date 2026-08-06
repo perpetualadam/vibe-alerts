@@ -518,20 +518,37 @@ export default function DashboardPage() {
           apiKey={showApiKey ? apiKey : null}
         />
 
-        <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold">Notification providers</h2>
-            <p className="text-sm text-vibe-muted mt-1">
-              Manage Telegram, Discord, Email, Teams, WhatsApp, and more — connection status,
-              health, test sends, and full delivery history.
-            </p>
+        <section className="grid sm:grid-cols-2 gap-4">
+          <div className="glass rounded-xl p-6 flex flex-col justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Notification providers</h2>
+              <p className="text-sm text-vibe-muted mt-1">
+                Manage Telegram, Discord, Email, Teams, WhatsApp, and more — connection status,
+                health, test sends, and delivery history.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/notifications"
+              className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
+            >
+              Open Notifications
+            </Link>
           </div>
-          <Link
-            href="/dashboard/notifications"
-            className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
-          >
-            Open Notifications
-          </Link>
+          <div className="glass rounded-xl p-6 flex flex-col justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Analytics</h2>
+              <p className="text-sm text-vibe-muted mt-1">
+                Webhooks, delivery success rates, latency, sources, and spam detection stats
+                with date filters and CSV export.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/analytics"
+              className="px-5 py-2.5 rounded-lg border border-vibe-border hover:bg-white/5 text-sm font-medium transition-colors whitespace-nowrap text-center"
+            >
+              Open Analytics
+            </Link>
+          </div>
         </section>
 
         <ChannelSettings

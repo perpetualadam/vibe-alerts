@@ -118,3 +118,6 @@ Dashboard test:
 | `app/api/dashboard/notifications/test/route.js` | Multi-provider test via NotificationService |
 | `app/api/dashboard/notifications/health/route.js` | Multi-provider health checks |
 | `app/dashboard/notifications/page.js` | Notifications settings UI |
+| `app/dashboard/analytics/page.js` | Analytics charts, filters, CSV export |
+| `lib/analytics/` | RPC-backed aggregations + CSV helpers |
+| `lib/spam/detect.js` | Heuristic spam scoring for analytics |

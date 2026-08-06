@@ -93,7 +93,7 @@ fetch("https://vibe-alerts.com/api/v1/webhook/YOUR-TOKEN", {
 - RLS on all user tables
 - Server-only secrets never exposed to client
 
-Run migrations in order: `001` → `003` → `004` → `005`.
+Run migrations in order: `001` → `003` → `004` → `005` → `006` → `007`.
 
 ## Deployment (Vercel + Cloudflare)
 
@@ -153,6 +153,14 @@ See `docs/PLUGIN_ARCHITECTURE.md` for the full contract.
 plus a filterable Notification History table (provider, success/failure, date).
 
 Run migration `006_notification_logs_indexes.sql` for faster history queries.
+
+### Analytics dashboard
+
+`/dashboard/analytics` — webhooks, deliveries, latency, active providers, top sources/channels,
+daily/monthly charts, spam detection stats, date + provider filters, CSV export, dark/light toggle.
+
+Run migration `007_analytics.sql` for Postgres aggregate RPCs and spam/platform columns
+(required for large-dataset performance).
 
 Run migrations in order: `001` → `003` (003 supersedes 002) → `004` (security hardening) → `005` (WhatsApp connections).
 

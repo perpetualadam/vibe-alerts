@@ -10,6 +10,11 @@ const LINKS = [
     label: 'Notifications',
     match: (path) => path.startsWith('/dashboard/notifications'),
   },
+  {
+    href: '/dashboard/analytics',
+    label: 'Analytics',
+    match: (path) => path.startsWith('/dashboard/analytics'),
+  },
 ];
 
 /**
