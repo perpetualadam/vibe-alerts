@@ -85,7 +85,7 @@ describe('Integration Wizard service', () => {
 
     const result = await selectWizardPlatform('user-1', 'wordpress');
     expect(result.ok).toBe(true);
-    expect(result.guide.label).toBe('WordPress');
+    expect(result.guide.label).toBe('WordPress (all forms)');
     expect(upsertWizardProgress).toHaveBeenCalledWith(
       'user-1',
       expect.objectContaining({

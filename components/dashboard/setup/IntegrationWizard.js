@@ -260,7 +260,14 @@ export default function IntegrationWizard({ onToast }) {
                         : 'border-vibe-border hover:bg-white/5'
                     }`}
                   >
-                    <span className="font-medium block">{platform.label}</span>
+                    <span className="font-medium block">
+                      {platform.label}
+                      {platform.native ? (
+                        <span className="ml-2 text-[10px] uppercase tracking-wide text-vibe-accent">
+                          Native
+                        </span>
+                      ) : null}
+                    </span>
                     <span className="text-xs text-vibe-muted mt-1 block">
                       {platform.description}
                     </span>
@@ -386,7 +393,7 @@ export default function IntegrationWizard({ onToast }) {
                 onClick={() => runTest('simulate')}
                 className="px-4 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium disabled:opacity-50"
               >
-                {busy === 'test' ? 'Testing…' : 'Send test from wizard'}
+                {busy === 'test' ? 'Sending…' : 'Send Test Notification'}
               </button>
               <button
                 type="button"
@@ -398,8 +405,9 @@ export default function IntegrationWizard({ onToast }) {
               </button>
             </div>
             <p className="text-xs text-vibe-muted">
-              <strong className="text-white/80 font-medium">Send test from wizard</strong> posts a
-              sample {guide?.label} payload through your webhook (recommended).{' '}
+              <strong className="text-white/80 font-medium">Send Test Notification</strong> posts a
+              sample {guide?.label} payload through your webhook and fans out to enabled channels
+              (recommended).{' '}
               <strong className="text-white/80 font-medium">I submitted a form</strong> looks for a
               real event from your site in the last 30 minutes.
             </p>

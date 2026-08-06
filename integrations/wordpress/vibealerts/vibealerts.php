@@ -3,7 +3,7 @@
  * Plugin Name:       VibeAlerts
  * Plugin URI:        https://vibe-alerts.com
  * Description:       Send WordPress form submissions to VibeAlerts automatically. Supports Contact Form 7, WPForms, Gravity Forms, Fluent Forms, and Elementor Forms — no per-form webhook setup.
- * Version:           2.0.0
+ * Version:           2.1.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            VibeAlerts

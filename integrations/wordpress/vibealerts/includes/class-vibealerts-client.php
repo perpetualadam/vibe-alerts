@@ -10,6 +10,33 @@ if (!defined('ABSPATH')) {
 class VibeAlerts_Client
 {
     /**
+     * Map plugin bridge source tags to first-class platform header ids.
+     *
+     * @param string $source
+     */
+    public static function platform_for_source(string $source): string
+    {
+        $normalized = strtolower($source);
+        $map = [
+            'contact-form-7'  => 'contact_form_7',
+            'contact_form_7'  => 'contact_form_7',
+            'cf7'             => 'contact_form_7',
+            'wpforms'         => 'wpforms',
+            'gravity-forms'   => 'gravity_forms',
+            'gravity_forms'   => 'gravity_forms',
+            'gravityforms'    => 'gravity_forms',
+            'fluent-forms'    => 'fluent_forms',
+            'fluent_forms'    => 'fluent_forms',
+            'fluentforms'     => 'fluent_forms',
+            'elementor-forms' => 'elementor_forms',
+            'elementor_forms' => 'elementor_forms',
+            'elementor'       => 'elementor_forms',
+        ];
+
+        return $map[$normalized] ?? VIBEALERTS_PLATFORM;
+    }
+
+    /**
      * Whether connection settings are present.
      */
     public static function is_configured(): bool
@@ -41,8 +68,9 @@ class VibeAlerts_Client
             ];
         }
 
-        $source = isset($args['source']) ? (string) $args['source'] : 'wordpress-plugin';
-        $payload['_platform'] = VIBEALERTS_PLATFORM;
+        $source   = isset($args['source']) ? (string) $args['source'] : 'wordpress-plugin';
+        $platform = self::platform_for_source($source);
+        $payload['_platform'] = $platform;
         $payload['_vibealerts_source'] = $source;
 
         $response = wp_remote_post($webhook_url, [
@@ -50,7 +78,7 @@ class VibeAlerts_Client
             'headers' => [
                 'Content-Type'             => 'application/json',
                 'Accept'                   => 'application/json',
-                VIBEALERTS_PLATFORM_HEADER => VIBEALERTS_PLATFORM,
+                VIBEALERTS_PLATFORM_HEADER => $platform,
                 VIBEALERTS_KEY_HEADER      => $api_key,
             ],
             'body' => wp_json_encode($payload),
@@ -101,14 +129,14 @@ class VibeAlerts_Client
      */
     public static function send_async(array $payload, string $source = 'wordpress-plugin'): void
     {
-        // Prefer non-blocking when available; still records last result best-effort.
         $webhook_url = (string) get_option('vibealerts_webhook_url', '');
         $api_key     = (string) get_option('vibealerts_api_key', '');
         if ($webhook_url === '' || $api_key === '') {
             return;
         }
 
-        $payload['_platform'] = VIBEALERTS_PLATFORM;
+        $platform = self::platform_for_source($source);
+        $payload['_platform'] = $platform;
         $payload['_vibealerts_source'] = $source;
 
         $response = wp_remote_post($webhook_url, [
@@ -117,7 +145,7 @@ class VibeAlerts_Client
             'headers'  => [
                 'Content-Type'             => 'application/json',
                 'Accept'                   => 'application/json',
-                VIBEALERTS_PLATFORM_HEADER => VIBEALERTS_PLATFORM,
+                VIBEALERTS_PLATFORM_HEADER => $platform,
                 VIBEALERTS_KEY_HEADER      => $api_key,
             ],
             'body' => wp_json_encode($payload),
@@ -132,7 +160,6 @@ class VibeAlerts_Client
                 'raw'    => '',
             ], $source);
         } else {
-            // Non-blocking responses may not include a body; mark as dispatched.
             self::store_last_result([
                 'ok'     => true,
                 'status' => 202,

@@ -69,14 +69,24 @@ The dashboard is mobile-first with:
 
 Run migration `009_push_subscriptions.sql` and set `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` (see `.env.example`). Enable push from **Notifications → Push notifications**.
 
+## Native website integrations
+
+First-class setup guides + **Send Test Notification** for:
+
+Wix · Squarespace · Webflow · Jotform · Typeform · Gravity Forms · Elementor Forms · Contact Form 7 · WPForms · Fluent Forms
+
+- Dashboard → **Website Platform Integrations** (per-platform guide + test button)
+- Setup Wizard → **`/dashboard/setup`**
+- Docs: [`docs/NATIVE_INTEGRATIONS.md`](docs/NATIVE_INTEGRATIONS.md)
+
 ## Website Integration Wizard
 
 Guided setup at **`/dashboard/setup`**:
 
-1. Choose platform (WordPress, Shopify, Google Forms, Wix, Squarespace, Webflow, Custom)
+1. Choose platform (Wix, Typeform, CF7, WPForms, … plus Shopify / Google Forms / Custom)
 2. Copy webhook URL + API key
 3. Follow tailored install steps
-4. **Test connection** (wizard simulate or verify a real site submit)
+4. **Send Test Notification** (wizard simulate or verify a real site submit)
 5. Mark complete — checklist progress is saved (migration `008_integration_wizard.sql`)
 
 ## WordPress Plugin
