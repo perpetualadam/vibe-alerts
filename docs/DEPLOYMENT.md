@@ -102,6 +102,16 @@ Telegram, Slack, Discord, and Teams work out of the box for customers (Telegram 
 
 Until set, the dashboard shows **Unavailable** for those channels with a support email link — not internal env var names.
 
+### Optional — Shopify App (OAuth)
+
+| Vercel env vars | Notes |
+|-----------------|-------|
+| `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET` | Partner Dashboard app credentials |
+| `CREDENTIALS_ENCRYPTION_KEY` | Same key used for WhatsApp token encryption |
+| `NEXT_PUBLIC_APP_URL` | Used for OAuth redirect + webhook address |
+
+Partner app URL: `https://yourdomain.com/install/shopify`. Redirect: `https://yourdomain.com/api/shopify/auth/callback`. Run migration `008_shopify_app.sql`. See **[SHOPIFY_APP.md](./SHOPIFY_APP.md)**.
+
 ### Phase 6 — SEO / AEO / LLMO verification
 
 | # | Task | URL to verify |

@@ -1,0 +1,32 @@
+# VibeAlerts Shopify App — Partner Dashboard / Shopify CLI config
+# Docs: https://shopify.dev/docs/apps/tools/cli/configuration
+#
+# Set client_id after creating the app in the Partner Dashboard.
+# application_url should match NEXT_PUBLIC_APP_URL + /install/shopify
+
+name = "VibeAlerts"
+client_id = "REPLACE_WITH_SHOPIFY_API_KEY"
+application_url = "https://YOUR_DOMAIN/install/shopify"
+embedded = false
+
+[access_scopes]
+scopes = "read_orders,read_customers,read_checkouts,read_merchant_managed_fulfillment_orders"
+
+[auth]
+redirect_urls = [
+  "https://YOUR_DOMAIN/api/shopify/auth/callback"
+]
+
+[webhooks]
+api_version = "2025-07"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/api/shopify/webhooks"
+
+  [[webhooks.subscriptions]]
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+  uri = "/api/shopify/webhooks"
+
+[pos]
+embedded = false

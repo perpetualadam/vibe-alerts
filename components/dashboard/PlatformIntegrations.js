@@ -29,7 +29,7 @@ export default function PlatformIntegrations({ webhookToken, apiKey }) {
       <div>
         <h2 className="text-lg font-semibold">Website Platform Integrations</h2>
         <p className="text-sm text-vibe-muted mt-1">
-          Connect WordPress, Wix, Webflow, Shopify, Squarespace, Typeform, Google Forms, or any HTML form. All use your webhook URL + API key.
+          Connect WordPress, Wix, Webflow, Shopify, Squarespace, Typeform, Google Forms, or any HTML form. Prefer the Shopify App panel below for OAuth + automatic webhooks; other platforms use your webhook URL + API key.
         </p>
       </div>
 

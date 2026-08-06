@@ -7,6 +7,7 @@ import ChannelSettings, {
 } from '@/components/dashboard/ChannelSettings';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
+import ShopifyConnection from '@/components/dashboard/ShopifyConnection';
 import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 import { createClient } from '@/lib/supabase/client';
 import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
@@ -233,6 +234,8 @@ export default function DashboardPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const billing = params.get('billing');
+    const shopify = params.get('shopify');
+    const shopifyError = params.get('shopify_error');
     if (billing === 'success') {
       showToast('Subscription activated. You can send test alerts now.', 'success');
       fetchDashboard();
@@ -240,8 +243,19 @@ export default function DashboardPage() {
     } else if (billing === 'cancelled') {
       showToast('Checkout cancelled.', 'info');
       window.history.replaceState({}, '', '/dashboard');
+    } else if (shopify === 'connected') {
+      const shop = params.get('shop');
+      showToast(
+        shop ? `Shopify connected: ${shop}` : 'Shopify App installed successfully',
+        'success'
+      );
+      fetchDashboard();
+      window.history.replaceState({}, '', '/dashboard');
+    } else if (shopifyError) {
+      showToast(shopifyError, 'error');
+      window.history.replaceState({}, '', '/dashboard');
     }
-    // Run once on mount to handle Stripe redirect query params.
+    // Run once on mount to handle Stripe / Shopify redirect query params.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -516,6 +530,22 @@ export default function DashboardPage() {
         <PlatformIntegrations
           webhookToken={data?.profile?.webhook_token}
           apiKey={showApiKey ? apiKey : null}
+        />
+
+        <ShopifyConnection
+          status={data?.shopify}
+          isActive={isActive}
+          onToast={showToast}
+          onUpdated={(json) => {
+            setData((prev) => ({
+              ...prev,
+              shopify: {
+                ...(prev?.shopify || {}),
+                connection: json.connection ?? json,
+              },
+            }));
+            fetchDashboard();
+          }}
         />
 
         <section className="grid sm:grid-cols-2 gap-4">

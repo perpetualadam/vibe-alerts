@@ -72,3 +72,20 @@ registerPlugin({
 ```
 
 To add a new channel: implement a provider, call `registerPlugin()`, run no migration needed (channel is TEXT).
+
+## public.shopify_shops (migration 008)
+
+Shopify App installs. **Service-role only** (encrypted offline access tokens).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `shop_domain` | TEXT, unique | e.g. `store.myshopify.com` |
+| `user_id` | UUID FK | VibeAlerts tenant |
+| `access_token_encrypted` | TEXT | AES-256-GCM offline token |
+| `enabled_topics` | TEXT[] | Merchant-selected webhook topics |
+| `webhook_ids` | JSONB | topic → Admin webhook id |
+| `connected` | BOOLEAN | Soft disconnect on uninstall |
+
+## public.shopify_webhook_events (migration 008)
+
+Idempotency for `X-Shopify-Webhook-Id` — service-role only.
