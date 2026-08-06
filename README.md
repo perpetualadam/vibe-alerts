@@ -47,6 +47,22 @@ lib/
 supabase/migrations/                # Database schema + RLS
 ```
 
+## AI Lead Intelligence
+
+`/dashboard/ai` — LLM-agnostic analysis (Groq, OpenAI, Anthropic, Grok/xAI) for every inbound lead:
+
+- Summary · Category · Priority · Spam score · Sentiment · Intent
+- Durable job queue (fast webhook responses)
+- Optional AI fields in notifications
+- Per-tenant enable/disable
+
+```bash
+# Run migration 013_ai_lead_intelligence.sql
+# Set GROQ_API_KEY (or OPENAI_API_KEY / ANTHROPIC_API_KEY / XAI_API_KEY) + CRON_SECRET
+```
+
+See **[docs/AI_LEAD_INTELLIGENCE.md](docs/AI_LEAD_INTELLIGENCE.md)**.
+
 ## Billing
 
 `/dashboard/billing` — Starter/Pro **monthly & annual** plans, free trial, promo codes, webhook usage limits, invoices, Customer Portal, upgrade/downgrade, and team seats.

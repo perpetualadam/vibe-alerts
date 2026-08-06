@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import DashboardShell from '@/components/dashboard/DashboardShell';
 import NotificationHistory from '@/components/dashboard/NotificationHistory';
 import ProviderCard from '@/components/dashboard/ProviderCard';
@@ -161,7 +162,11 @@ export default function NotificationsPage() {
         <h2 className="text-lg font-semibold">Notification Providers</h2>
         <p className="text-sm text-vibe-muted max-w-2xl">
           Enable any combination of providers. Each inbound webhook is delivered through
-          NotificationService to every enabled channel.
+          NotificationService to every enabled channel.{' '}
+          <Link href="/dashboard/ai" className="text-vibe-accent hover:underline">
+            Configure AI Lead Intelligence
+          </Link>{' '}
+          to enrich alerts with summaries and priority.
         </p>
       </section>
 
