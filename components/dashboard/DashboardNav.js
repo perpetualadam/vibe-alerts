@@ -21,6 +21,11 @@ const LINKS = [
     match: (path) => path.startsWith('/dashboard/analytics'),
   },
   {
+    href: '/dashboard/ai',
+    label: 'AI Insights',
+    match: (path) => path.startsWith('/dashboard/ai'),
+  },
+  {
     href: '/dashboard/billing',
     label: 'Billing',
     match: (path) => path.startsWith('/dashboard/billing'),
