@@ -147,6 +147,13 @@ Each provider implements a common interface: `send()`, `test()`, `healthCheck()`
 
 See `docs/PLUGIN_ARCHITECTURE.md` for the full contract.
 
+### Notifications dashboard
+
+`/dashboard/notifications` — per-provider Connected / Health / Enable·Disable / Send Test,
+plus a filterable Notification History table (provider, success/failure, date).
+
+Run migration `006_notification_logs_indexes.sql` for faster history queries.
+
 Run migrations in order: `001` → `003` (003 supersedes 002) → `004` (security hardening) → `005` (WhatsApp connections).
 
 ### WhatsApp Business (Meta Cloud API)

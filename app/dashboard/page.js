@@ -5,8 +5,8 @@ import { useCallback, useEffect, useState } from 'react';
 import ChannelSettings, {
   isAnyChannelConfiguredFromCatalog,
 } from '@/components/dashboard/ChannelSettings';
+import DashboardNav from '@/components/dashboard/DashboardNav';
 import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
-import WhatsAppConnection from '@/components/dashboard/WhatsAppConnection';
 import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 import { createClient } from '@/lib/supabase/client';
 import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
@@ -306,32 +306,6 @@ export default function DashboardPage() {
     showToast('Channel settings saved', 'success');
   };
 
-  const applyWhatsAppUpdate = (payload) => {
-    setData((prev) => {
-      if (!prev) return prev;
-      const next = { ...prev };
-      if (payload?.connection) {
-        next.whatsapp = {
-          ...(prev.whatsapp ?? {}),
-          connection: payload.connection,
-          platformReady: prev.whatsapp?.platformReady ?? true,
-          encryptionReady: prev.whatsapp?.encryptionReady ?? true,
-        };
-      }
-      if (payload?.channel) {
-        next.channelConfigs = {
-          ...prev.channelConfigs,
-          whatsapp: {
-            enabled: payload.channel.enabled,
-            config: payload.channel.config,
-            connected_at: payload.channel.connected_at,
-          },
-        };
-      }
-      return next;
-    });
-  };
-
   const sendTestAlert = async () => {
     setTesting(true);
     try {
@@ -454,9 +428,10 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+        <DashboardNav />
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold">Billing</h2>
@@ -543,14 +518,21 @@ export default function DashboardPage() {
           apiKey={showApiKey ? apiKey : null}
         />
 
-        <WhatsAppConnection
-          status={data?.whatsapp}
-          recipientPhone={data?.channelConfigs?.whatsapp?.config?.phone}
-          channelEnabled={Boolean(data?.channelConfigs?.whatsapp?.enabled)}
-          onUpdated={applyWhatsAppUpdate}
-          onToast={showToast}
-          isActive={isActive}
-        />
+        <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">Notification providers</h2>
+            <p className="text-sm text-vibe-muted mt-1">
+              Manage Telegram, Discord, Email, Teams, WhatsApp, and more — connection status,
+              health, test sends, and full delivery history.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/notifications"
+            className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
+          >
+            Open Notifications
+          </Link>
+        </section>
 
         <ChannelSettings
           plugins={plugins}

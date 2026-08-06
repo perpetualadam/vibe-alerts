@@ -113,5 +113,8 @@ Dashboard test:
 | `lib/notifications/providers/*.js` | Telegram, Email, Discord, Teams, WhatsApp, Slack |
 | `lib/channel-configs/db.js` | Generic `channel_configs` table |
 | `app/api/dashboard/plugins/route.js` | Client-safe plugin metadata |
+| `app/api/dashboard/notifications/route.js` | Notifications overview (connected, last success/fail, health) |
+| `app/api/dashboard/notifications/logs/route.js` | Filtered notification history |
 | `app/api/dashboard/notifications/test/route.js` | Multi-provider test via NotificationService |
 | `app/api/dashboard/notifications/health/route.js` | Multi-provider health checks |
+| `app/dashboard/notifications/page.js` | Notifications settings UI |
