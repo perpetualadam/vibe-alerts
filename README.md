@@ -104,7 +104,18 @@ fetch("https://vibe-alerts.com/api/v1/webhook/YOUR-TOKEN", {
 - RLS on all user tables
 - Server-only secrets never exposed to client
 
-Run migrations in order: `001` → `003` → `004` → `005` → `006` → `007`.
+Run migrations in order: `001` → `003` → `004` → `005` → `006` → `007` → `008`.
+
+## Shopify App
+
+OAuth install with automatic Admin webhook subscriptions — no manual Flow setup required.
+
+1. Create a Partner app; set App URL to `{APP_URL}/install/shopify` and redirect to `{APP_URL}/api/shopify/auth/callback`
+2. Set `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`, `CREDENTIALS_ENCRYPTION_KEY`, and `NEXT_PUBLIC_APP_URL`
+3. Run migration `008_shopify_app.sql`
+4. In the dashboard **Shopify App** panel: enter `store.myshopify.com` → **Install**, then choose notification events
+
+See **[docs/SHOPIFY_APP.md](docs/SHOPIFY_APP.md)** and `shopify.app.toml`.
 
 ## Deployment (Vercel + Cloudflare)
 

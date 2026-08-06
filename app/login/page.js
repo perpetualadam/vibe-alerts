@@ -7,6 +7,13 @@ import { useRouter } from 'next/navigation';
 import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
 import { getSubscriptionPriceLabel } from '@/lib/legal/site';
 
+/** Only allow same-origin relative paths (blocks open redirects). */
+function safeNextPath(value) {
+  if (!value || typeof value !== 'string') return '/dashboard';
+  if (!value.startsWith('/') || value.startsWith('//')) return '/dashboard';
+  return value;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,12 +21,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [supabase, setSupabase] = useState(null);
+  const [nextPath, setNextPath] = useState('/dashboard');
   const router = useRouter();
   const trialLabel = getSubscriptionTrialLabel();
   const priceLabel = getSubscriptionPriceLabel();
 
   useEffect(() => {
     setSupabase(createClient());
+    const params = new URLSearchParams(window.location.search);
+    setNextPath(safeNextPath(params.get('next')));
   }, []);
 
   const handleSubmit = async (e) => {
@@ -35,7 +45,7 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      router.push('/dashboard');
+      router.push(nextPath);
     } else {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) {

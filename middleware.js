@@ -34,7 +34,10 @@ export async function middleware(request) {
   if (isDashboard && !user) {
     response = NextResponse.redirect(new URL('/login', request.url));
   } else if (isLoginRoot && user) {
-    response = NextResponse.redirect(new URL('/dashboard', request.url));
+    const next = request.nextUrl.searchParams.get('next');
+    const dest =
+      next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
+    response = NextResponse.redirect(new URL(dest, request.url));
   } else if (user && pathname.startsWith('/login/forgot-password')) {
     response = NextResponse.redirect(new URL('/dashboard', request.url));
   }
