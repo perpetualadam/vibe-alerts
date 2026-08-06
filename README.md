@@ -58,6 +58,17 @@ npm run stripe:setup   # creates products/prices + portal config
 
 See **[docs/BILLING.md](docs/BILLING.md)**.
 
+## Automation rules
+
+`/dashboard/rules` — if/then routing for inbound leads:
+
+- If priority is High → WhatsApp + Teams
+- If spam score > 80% → ignore
+- If category is Sales → Sales workspace channels
+- If message contains “urgent” → mark Critical
+
+Run migration `011_automation_rules.sql`. See **[docs/AUTOMATION_RULES.md](docs/AUTOMATION_RULES.md)**.
+
 ## Mobile dashboard & PWA
 
 The dashboard is mobile-first with:
