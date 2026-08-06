@@ -58,6 +58,28 @@ npm run stripe:setup   # creates products/prices + portal config
 
 See **[docs/BILLING.md](docs/BILLING.md)**.
 
+## Reliability & monitoring
+
+Operational tooling for delivery reliability and ops visibility:
+
+| Piece | Detail |
+|-------|--------|
+| Liveness | `GET /api/health` |
+| Readiness | `GET /api/health/ready` (Supabase, Redis, config) |
+| Uptime | `GET /api/uptime` — readiness + recorded probe samples |
+| Retry queue | Sync backoff then durable `retrying` rows with exponential backoff |
+| Dead letters | Exhausted deliveries → `notification_dead_letters` |
+| Cron | `GET /api/cron/retries` every 2 minutes (`CRON_SECRET`) |
+| Errors | Structured JSON logs + optional Sentry (`SENTRY_DSN`) |
+| Admin UI | `/dashboard/admin` for platform operators |
+
+```bash
+# Run migration 011_reliability_monitoring.sql
+# Set CRON_SECRET, PLATFORM_ADMIN_EMAILS, optional SENTRY_DSN
+```
+
+Grant ops access with `PLATFORM_ADMIN_EMAILS=you@company.com` or `profiles.is_platform_admin = true`.
+
 ## Mobile dashboard & PWA
 
 The dashboard is mobile-first with:
@@ -150,8 +172,8 @@ See **[docs/CLOUDFLARE.md](docs/CLOUDFLARE.md)** for Cloudflare WAF, cache, webh
 2. Set env vars from `.env.example`
 3. Connect domain via Cloudflare DNS
 4. Set `NEXT_PUBLIC_APP_URL=https://yourdomain.com`
-5. Run Supabase migrations `001` → `003` → `004` → `005`
-6. Verify: `/api/health`, `/sitemap.xml`, `/llms.txt`
+5. Run Supabase migrations through `011_reliability_monitoring.sql`
+6. Verify: `/api/health`, `/api/health/ready`, `/sitemap.xml`, `/llms.txt`
 
 ## SEO / AEO / LLMO
 

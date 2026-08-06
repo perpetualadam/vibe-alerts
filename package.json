@@ -15,6 +15,7 @@
     "stripe:setup:live": "node scripts/stripe-setup.mjs --require-live"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.69.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
     "next": "^15.1.3",

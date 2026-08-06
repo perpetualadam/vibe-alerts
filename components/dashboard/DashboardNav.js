@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const LINKS = [
   { href: '/dashboard', label: 'Overview', match: (path) => path === '/dashboard' },
@@ -33,6 +34,31 @@ const LINKS = [
  */
 export default function DashboardNav({ maxWidthClass = 'max-w-5xl' }) {
   const pathname = usePathname() || '/dashboard';
+  const [showAdmin, setShowAdmin] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/admin/me', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.isPlatformAdmin) setShowAdmin(true);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const links = showAdmin
+    ? [
+        ...LINKS,
+        {
+          href: '/dashboard/admin',
+          label: 'Admin',
+          match: (path) => path.startsWith('/dashboard/admin'),
+        },
+      ]
+    : LINKS;
 
   return (
     <nav
@@ -41,7 +67,7 @@ export default function DashboardNav({ maxWidthClass = 'max-w-5xl' }) {
     >
       <div className={`${maxWidthClass} mx-auto px-4 sm:px-6`}>
         <ul className="flex gap-1 overflow-x-auto py-2 -mb-px scrollbar-none">
-          {LINKS.map((link) => {
+          {links.map((link) => {
             const active = link.match(pathname);
             return (
               <li key={link.href} className="shrink-0">
