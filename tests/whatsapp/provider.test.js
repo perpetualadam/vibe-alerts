@@ -6,6 +6,7 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/lib/whatsapp/service', () => ({
   sendWhatsAppAlert: vi.fn(),
+  sendWhatsAppTestMessage: vi.fn(),
   isWhatsAppPlatformReady: vi.fn(() => true),
 }));
 

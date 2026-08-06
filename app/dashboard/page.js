@@ -333,23 +333,16 @@ export default function DashboardPage() {
   };
 
   const sendTestAlert = async () => {
-    if (!data?.profile?.webhook_token) return;
     setTesting(true);
     try {
-      const credRes = await fetch('/api/dashboard/signing-credentials');
-      if (!credRes.ok) throw new Error('Could not get signing credentials');
-      const { api_key } = await credRes.json();
-
-      const payload = { Name: 'John Doe', Message: 'System Test Working!' };
-      const body = JSON.stringify(payload);
-
-      const res = await fetch(`/api/v1/webhook/${data.profile.webhook_token}`, {
+      // Dashboard tests go through NotificationService → enabled providers
+      // (never call providers from the client; webhook layer stays for real leads).
+      const res = await fetch('/api/dashboard/notifications/test', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-VibeAlerts-Key': api_key,
-        },
-        body,
+        headers: dashboardMutationHeaders(),
+        body: JSON.stringify({
+          payload: { Name: 'John Doe', Message: 'System Test Working!' },
+        }),
       });
 
       const result = await res.json();

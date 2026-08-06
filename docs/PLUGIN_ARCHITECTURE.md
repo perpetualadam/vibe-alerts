@@ -1,11 +1,38 @@
 # Plugin Architecture
 
-VibeAlerts notification channels are **plugins** registered at startup.
+VibeAlerts notification channels are **plugins** registered at startup and orchestrated by **NotificationService**.
 
-Built-in channels today: Telegram, Email, WhatsApp, Slack, Discord, and Microsoft Teams.
-Discord is a first-class webhook channel (same pattern as Slack/Teams) — enable it from the dashboard with an Incoming Webhook URL.
+```
+Webhook  →  NotificationService  →  Enabled Providers
+                │
+                ├── TelegramProvider.send()
+                ├── EmailProvider.send()      (Resend)
+                ├── DiscordProvider.send()
+                ├── TeamsProvider.send()
+                ├── WhatsAppProvider.send()
+                └── SlackProvider.send()
+```
+
+The webhook endpoint **never** imports or calls providers directly.
+
+Built-in channels: Telegram, Email (Resend), WhatsApp, Slack, Discord, and Microsoft Teams.
 
 WhatsApp uses the official Meta Cloud API with **per-tenant** credentials (WABA ID, Phone Number ID, encrypted access token) stored in `whatsapp_connections`. See migration `005_whatsapp_connections.sql` and `lib/whatsapp/`.
+
+## Common provider interface
+
+Every provider extends `NotificationProvider` and implements:
+
+| Method | Purpose |
+|--------|---------|
+| `send(context)` | Deliver a lead/alert payload |
+| `test(context)` | Send a test notification |
+| `healthCheck(context?)` | Report platform / tenant readiness |
+| `validateConfig(config)` | Validate tenant config |
+| `formatMessage(payload)` | Channel-specific formatting |
+| `isPlatformReady()` | Server credential gate |
+
+Multiple providers may be enabled at once. One inbound webhook notifies **every** enabled & configured provider.
 
 ## Adding a New Channel
 
@@ -28,6 +55,7 @@ export class SmsProvider extends NotificationProvider {
   validateConfig(config) { /* return { valid, config?, error? } */ }
   formatMessage(payload) { /* provider-owned formatting */ }
   async send(context) { /* use this.getConfig(context) */ }
+  // test() and healthCheck() inherit sensible defaults from the base class
 }
 
 export const smsPlugin = {
@@ -59,34 +87,31 @@ The dashboard renders forms dynamically — no UI code changes needed.
 ## Data Flow
 
 ```
-Webhook POST
+Webhook POST /api/v1/webhook/[token]
   → processor.js (auth, validate payload)
   → fetchChannelConfigs(userId)
-  → deliverNotifications({ channelConfigs, payload })
+  → notificationService.notify({ channelConfigs, payload })
   → registry.getEnabledProviders(channelConfigs)
-  → provider.formatMessage(payload)   ← provider-owned
-  → provider.send(context)
+  → for each configured provider:
+        provider.send(context)   // or provider.test() for dashboard tests
   → notification_logs
+
+Dashboard test:
+  POST /api/dashboard/notifications/test
+  → notificationService.test(...)
+  → provider.test() on each enabled provider
 ```
 
 ## Key Files
 
 | File | Role |
 |------|------|
+| `lib/notifications/service.js` | `NotificationService` orchestrator (`notify`, `test`, `healthCheck`) |
 | `lib/notifications/registry.js` | `registerPlugin()`, `getPluginCatalog()` |
 | `lib/notifications/plugins/index.js` | Built-in plugin bootstrap |
-| `lib/notifications/providers/base.js` | Plugin contract |
-| `lib/notifications/providers/discord.js` | Discord Incoming Webhook provider |
+| `lib/notifications/providers/base.js` | Common interface (`send` / `test` / `healthCheck`) |
+| `lib/notifications/providers/*.js` | Telegram, Email, Discord, Teams, WhatsApp, Slack |
 | `lib/channel-configs/db.js` | Generic `channel_configs` table |
 | `app/api/dashboard/plugins/route.js` | Client-safe plugin metadata |
-
-## Plugin Contract
-
-Every provider must implement:
-
-- `static configSchema` — dashboard form fields
-- `validateConfig(config)` — tenant config validation
-- `formatMessage(payload)` — channel-specific formatting
-- `formatPreview(payload)` — log preview (inherited default)
-- `send(context)` — delivery logic
-- `isPlatformReady()` — optional server credential check
+| `app/api/dashboard/notifications/test/route.js` | Multi-provider test via NotificationService |
+| `app/api/dashboard/notifications/health/route.js` | Multi-provider health checks |

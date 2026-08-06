@@ -126,7 +126,15 @@ Homepage includes FAQ + HowTo JSON-LD for answer engines (AEO).
 
 ## Notification Channels
 
-All notification channels are implemented via the provider pattern in `lib/notifications/providers/`:
+Provider-based architecture:
+
+```
+Webhook → NotificationService → Enabled Providers
+```
+
+The webhook never calls providers directly. One inbound event notifies **every** enabled provider (Telegram ✓ Email ✓ Discord ✓ Teams ✓ WhatsApp ✓ Slack ✓).
+
+Each provider implements a common interface: `send()`, `test()`, `healthCheck()`.
 
 | Channel | Config (dashboard) | Server env vars |
 |---------|-------------------|-----------------|
@@ -136,6 +144,8 @@ All notification channels are implemented via the provider pattern in `lib/notif
 | Slack | Incoming Webhook URL | — (per-tenant) |
 | Discord | Incoming Webhook URL | — (per-tenant) |
 | Microsoft Teams | Incoming Webhook URL | — (per-tenant) |
+
+See `docs/PLUGIN_ARCHITECTURE.md` for the full contract.
 
 Run migrations in order: `001` → `003` (003 supersedes 002) → `004` (security hardening) → `005` (WhatsApp connections).
 

@@ -102,7 +102,7 @@ export default function ChannelSettings({
         <div>
           <h2 className="text-lg font-semibold">Notification Channels</h2>
           <p className="text-sm text-vibe-muted mt-1">
-            Plugin registry — enable channels and configure destinations. All enabled & configured plugins receive each lead.
+            Provider architecture — enable any combination of channels. NotificationService fans each lead out to every enabled & configured provider.
           </p>
         </div>
         <button
