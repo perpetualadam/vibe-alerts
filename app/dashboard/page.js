@@ -456,6 +456,7 @@ export default function DashboardPage() {
       <PlatformIntegrations
         webhookToken={data?.profile?.webhook_token}
         apiKey={showApiKey ? apiKey : null}
+        onToast={showToast}
       />
 
       <section className="grid sm:grid-cols-2 gap-4">
