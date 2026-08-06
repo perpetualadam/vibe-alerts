@@ -80,6 +80,17 @@ Operational tooling for delivery reliability and ops visibility:
 
 Grant ops access with `PLATFORM_ADMIN_EMAILS=you@company.com` or `profiles.is_platform_admin = true`.
 
+## Automation rules
+
+`/dashboard/rules` — if/then routing for inbound leads:
+
+- If priority is High → WhatsApp + Teams
+- If spam score > 80% → ignore
+- If category is Sales → Sales workspace channels
+- If message contains “urgent” → mark Critical
+
+Run migration `012_automation_rules.sql`. See **[docs/AUTOMATION_RULES.md](docs/AUTOMATION_RULES.md)**.
+
 ## Mobile dashboard & PWA
 
 The dashboard is mobile-first with:
