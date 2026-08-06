@@ -513,6 +513,22 @@ export default function DashboardPage() {
           </div>
         </section>
 
+        <section className="glass rounded-xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">Website Integration Wizard</h2>
+            <p className="text-sm text-vibe-muted mt-1">
+              Choose WordPress, Shopify, Google Forms, Wix, Squarespace, Webflow, or Custom — get
+              tailored steps, test the connection, and track progress with a checklist.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/setup"
+            className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
+          >
+            Open Setup Wizard
+          </Link>
+        </section>
+
         <PlatformIntegrations
           webhookToken={data?.profile?.webhook_token}
           apiKey={showApiKey ? apiKey : null}

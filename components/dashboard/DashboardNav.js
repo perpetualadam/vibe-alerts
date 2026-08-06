@@ -6,6 +6,11 @@ import { usePathname } from 'next/navigation';
 const LINKS = [
   { href: '/dashboard', label: 'Overview', match: (path) => path === '/dashboard' },
   {
+    href: '/dashboard/setup',
+    label: 'Setup Wizard',
+    match: (path) => path.startsWith('/dashboard/setup'),
+  },
+  {
     href: '/dashboard/notifications',
     label: 'Notifications',
     match: (path) => path.startsWith('/dashboard/notifications'),

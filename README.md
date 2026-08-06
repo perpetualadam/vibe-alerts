@@ -47,6 +47,16 @@ lib/
 supabase/migrations/                # Database schema + RLS
 ```
 
+## Website Integration Wizard
+
+Guided setup at **`/dashboard/setup`**:
+
+1. Choose platform (WordPress, Shopify, Google Forms, Wix, Squarespace, Webflow, Custom)
+2. Copy webhook URL + API key
+3. Follow tailored install steps
+4. **Test connection** (wizard simulate or verify a real site submit)
+5. Mark complete — checklist progress is saved (migration `008_integration_wizard.sql`)
+
 ## WordPress Plugin
 
 Native plugin under `integrations/wordpress/vibealerts/`:
