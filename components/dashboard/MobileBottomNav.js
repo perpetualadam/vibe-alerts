@@ -11,12 +11,6 @@ const ITEMS = [
     icon: HomeIcon,
   },
   {
-    href: '/dashboard/setup',
-    label: 'Setup',
-    match: (path) => path.startsWith('/dashboard/setup'),
-    icon: SetupIcon,
-  },
-  {
     href: '/dashboard/notifications',
     label: 'Alerts',
     match: (path) => path.startsWith('/dashboard/notifications'),
@@ -28,6 +22,12 @@ const ITEMS = [
     match: (path) => path.startsWith('/dashboard/analytics'),
     icon: ChartIcon,
   },
+  {
+    href: '/dashboard/billing',
+    label: 'Billing',
+    match: (path) => path.startsWith('/dashboard/billing'),
+    icon: BillingIcon,
+  },
 ];
 
 function HomeIcon({ active }) {
@@ -38,28 +38,6 @@ function HomeIcon({ active }) {
         stroke="currentColor"
         strokeWidth="1.75"
         strokeLinejoin="round"
-        fill={active ? 'currentColor' : 'none'}
-        fillOpacity={active ? 0.15 : 0}
-      />
-    </svg>
-  );
-}
-
-function SetupIcon({ active }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <circle
-        cx="12"
-        cy="12"
-        r="3.25"
-        stroke="currentColor"
-        strokeWidth="1.75"
         fill={active ? 'currentColor' : 'none'}
         fillOpacity={active ? 0.15 : 0}
       />
@@ -98,6 +76,25 @@ function ChartIcon({ active }) {
         strokeLinecap="round"
         opacity={active ? 1 : 0.9}
       />
+    </svg>
+  );
+}
+
+function BillingIcon({ active }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect
+        x="3"
+        y="6"
+        width="18"
+        height="12"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        fill={active ? 'currentColor' : 'none'}
+        fillOpacity={active ? 0.15 : 0}
+      />
+      <path d="M3 10h18" stroke="currentColor" strokeWidth="1.75" />
     </svg>
   );
 }

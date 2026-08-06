@@ -3,7 +3,7 @@ import { createPortalSession } from '@/lib/stripe/billing';
 import { requireDashboardUser } from '@/lib/security/dashboard-auth';
 import { logger } from '@/lib/logger';
 
-/** POST — create Stripe Customer Portal session */
+/** POST — open Stripe Customer Portal (invoices, payment method, plan changes) */
 export async function POST(request) {
   const auth = await requireDashboardUser(request, { csrf: true });
   if (auth.error) return auth.error;
@@ -11,7 +11,7 @@ export async function POST(request) {
   const { user, supabase } = auth;
   const { data: profile } = await supabase
     .from('profiles')
-    .select('email')
+    .select('email, stripe_customer_id')
     .eq('id', user.id)
     .single();
 
@@ -20,14 +20,30 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Account email is required for billing' }, { status: 400 });
   }
 
+  let body = {};
   try {
-    const url = await createPortalSession(email);
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+
+  const flow =
+    body.flow === 'subscription_update' || body.flow === 'payment_method_update'
+      ? body.flow
+      : null;
+
+  try {
+    const url = await createPortalSession({
+      email,
+      customerId: profile?.stripe_customer_id,
+      flow,
+    });
     return NextResponse.json({ url });
   } catch (err) {
-    if (err.message === 'No Stripe customer found for this account') {
-      return NextResponse.json({ error: 'No billing account found. Subscribe first.' }, { status: 404 });
-    }
     logger.error('Stripe portal session failed', { userId: user.id, error: err.message });
-    return NextResponse.json({ error: 'Could not open billing portal' }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || 'Could not open billing portal' },
+      { status: 400 }
+    );
   }
 }

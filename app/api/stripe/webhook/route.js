@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getStripe } from '@/lib/stripe/client';
+import { syncSubscriptionRecord } from '@/lib/stripe/billing';
 import {
   mapStripeSubscriptionStatus,
   resolveCheckoutUserId,
@@ -57,7 +58,19 @@ export async function POST(request) {
         const session = event.data.object;
         const userId = resolveCheckoutUserId(session);
         const email = session.customer_details?.email || session.customer_email;
-        await setSubscriptionStatus(supabase, { userId, email }, 'active');
+        const teamId = session.metadata?.team_id || null;
+        let subscription = null;
+        if (session.subscription) {
+          subscription = await getStripe().subscriptions.retrieve(String(session.subscription));
+        }
+        await syncSubscriptionRecord({
+          userId,
+          email,
+          teamId,
+          customerId: typeof session.customer === 'string' ? session.customer : session.customer?.id,
+          subscription,
+          status: 'active',
+        });
         break;
       }
 
@@ -65,21 +78,47 @@ export async function POST(request) {
         const session = event.data.object;
         const userId = resolveCheckoutUserId(session);
         const email = session.customer_details?.email || session.customer_email;
-        await setSubscriptionStatus(supabase, { userId, email }, 'inactive');
+        await syncSubscriptionRecord({
+          userId,
+          email,
+          teamId: session.metadata?.team_id || null,
+          customerId: typeof session.customer === 'string' ? session.customer : null,
+          subscription: null,
+          status: 'inactive',
+        });
         break;
       }
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
         const email = resolveInvoiceEmail(invoice);
-        if (email) await setSubscriptionStatus(supabase, { email }, 'active');
+        const customerId =
+          typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
+        let subscription = null;
+        if (invoice.subscription) {
+          subscription = await getStripe().subscriptions.retrieve(String(invoice.subscription));
+        }
+        await syncSubscriptionRecord({
+          userId: subscription?.metadata?.user_id || null,
+          email,
+          teamId: subscription?.metadata?.team_id || null,
+          customerId,
+          subscription,
+          status: 'active',
+        });
         break;
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
         const email = resolveInvoiceEmail(invoice);
-        if (email) await setSubscriptionStatus(supabase, { email }, 'inactive');
+        await syncSubscriptionRecord({
+          userId: null,
+          email,
+          customerId: typeof invoice.customer === 'string' ? invoice.customer : null,
+          subscription: null,
+          status: 'inactive',
+        });
         break;
       }
 
@@ -87,16 +126,30 @@ export async function POST(request) {
         const subscription = event.data.object;
         const status = mapStripeSubscriptionStatus(subscription.status);
         const customer = await getStripe().customers.retrieve(subscription.customer);
-        const email = customer.email;
-        if (email) await setSubscriptionStatus(supabase, { email }, status);
+        const email = !customer.deleted ? customer.email : null;
+        await syncSubscriptionRecord({
+          userId: subscription.metadata?.user_id || null,
+          email,
+          teamId: subscription.metadata?.team_id || null,
+          customerId: typeof subscription.customer === 'string' ? subscription.customer : null,
+          subscription,
+          status,
+        });
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
         const customer = await getStripe().customers.retrieve(subscription.customer);
-        const email = customer.email;
-        if (email) await setSubscriptionStatus(supabase, { email }, 'inactive');
+        const email = !customer.deleted ? customer.email : null;
+        await syncSubscriptionRecord({
+          userId: subscription.metadata?.user_id || null,
+          email,
+          teamId: subscription.metadata?.team_id || null,
+          customerId: typeof subscription.customer === 'string' ? subscription.customer : null,
+          subscription,
+          status: 'inactive',
+        });
         break;
       }
 
@@ -109,25 +162,4 @@ export async function POST(request) {
   }
 
   return Response.json({ received: true });
-}
-
-async function setSubscriptionStatus(supabase, { userId, email }, status) {
-  let query = supabase.from('profiles').update({ stripe_subscription_status: status });
-
-  if (userId) {
-    query = query.eq('id', userId);
-  } else if (email) {
-    query = query.eq('email', email);
-  } else {
-    throw new Error('Cannot update subscription status without user id or email');
-  }
-
-  const { error } = await query;
-
-  if (error) {
-    logger.error('Failed to update subscription status', { userId, email, status, error: error.message });
-    throw error;
-  }
-
-  logger.info('Subscription status updated', { userId, email, status });
 }

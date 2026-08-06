@@ -20,6 +20,11 @@ const LINKS = [
     label: 'Analytics',
     match: (path) => path.startsWith('/dashboard/analytics'),
   },
+  {
+    href: '/dashboard/billing',
+    label: 'Billing',
+    match: (path) => path.startsWith('/dashboard/billing'),
+  },
 ];
 
 /**

@@ -47,6 +47,17 @@ lib/
 supabase/migrations/                # Database schema + RLS
 ```
 
+## Billing
+
+`/dashboard/billing` — Starter/Pro **monthly & annual** plans, free trial, promo codes, webhook usage limits, invoices, Customer Portal, upgrade/downgrade, and team seats.
+
+```bash
+npm run stripe:setup   # creates products/prices + portal config
+# Run migration 010_billing_enhancements.sql
+```
+
+See **[docs/BILLING.md](docs/BILLING.md)**.
+
 ## Mobile dashboard & PWA
 
 The dashboard is mobile-first with:

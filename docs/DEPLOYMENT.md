@@ -82,7 +82,7 @@ See **[STRIPE_LIVE.md](./STRIPE_LIVE.md)** for the full live-mode checklist (pro
 
 | # | Task | Details |
 |---|------|---------|
-| 25 | Stripe product + price | Create recurring **VibeAlerts** subscription price; set `STRIPE_PRICE_ID` in Vercel |
+| 25 | Stripe products + prices | Run `npm run stripe:setup` for Starter/Pro monthly+yearly; set `STRIPE_PRICE_*` (+ legacy `STRIPE_PRICE_ID`) |
 | 26 | Stripe webhook endpoint | `https://yourdomain.com/api/stripe/webhook` |
 | 27 | Stripe events | `checkout.session.completed`, `checkout.session.async_payment_failed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` |
 | 28 | Customer Portal | Enable in Stripe Dashboard → Settings → Billing → Customer portal |

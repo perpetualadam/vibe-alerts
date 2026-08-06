@@ -3,84 +3,92 @@ import MarketingShell from '@/components/marketing/MarketingShell';
 import AudienceProblems from '@/components/marketing/AudienceProblems';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { getLegalContext } from '@/lib/legal/site';
+import { getPublicPlanCatalog } from '@/lib/stripe/plans';
 
 export const metadata = buildPageMetadata({
   title: 'Pricing',
   description:
-    'VibeAlerts subscription pricing for website form to Telegram and multi-channel alert delivery.',
+    'VibeAlerts subscription pricing — monthly and annual plans with free trial, usage limits, and team billing.',
   path: '/pricing',
 });
 
 export default function PricingPage() {
-  const { siteName, priceLabel, supportEmail, trialLabel } = getLegalContext();
-
-  const included = [
-    'Unlimited webhook endpoints per account (one URL per tenant)',
-    'Telegram, Email, Slack, Discord, Microsoft Teams, and WhatsApp notifications',
-    'Platform connectors for WordPress, Wix, Webflow, Shopify, Squarespace, Typeform, and Google Forms',
-    'Dashboard for API keys, channel settings, and delivery history',
-    'API key and HMAC webhook authentication with rate limiting',
-  ];
+  const { siteName, supportEmail, trialLabel } = getLegalContext();
+  const plans = getPublicPlanCatalog();
 
   return (
     <MarketingShell>
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 space-y-16">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Simple subscription pricing</h1>
-          <p className="text-vibe-muted text-lg">
-            {siteName} is a software subscription. One plan includes every notification channel and platform
-            integration.
+          <h1 className="text-4xl font-bold">Simple, flexible pricing</h1>
+          <p className="text-vibe-muted text-lg max-w-2xl mx-auto">
+            {siteName} offers monthly and annual plans, a free trial, promo codes at checkout, usage
+            allowances, invoices, and team billing.
           </p>
+          {trialLabel && (
+            <p className="text-sm text-vibe-accent font-medium">{trialLabel} on every paid plan</p>
+          )}
         </div>
 
-        <article className="glass rounded-2xl p-8 space-y-6 border border-vibe-border max-w-3xl mx-auto">
-          <div className="space-y-1">
-            <p className="text-sm uppercase tracking-wider text-vibe-accent font-medium">VibeAlerts Pro</p>
-            {trialLabel ? (
-              <>
-                <p className="text-4xl font-bold">{trialLabel}</p>
-                <p className="text-lg text-vibe-muted">Then {priceLabel}</p>
-              </>
-            ) : (
-              <p className="text-4xl font-bold">{priceLabel}</p>
-            )}
-            <p className="text-sm text-vibe-muted">
-              {trialLabel
-                ? 'Card required at signup. Cancel before the trial ends to avoid the first charge.'
-                : 'Billed monthly. Cancel anytime from your dashboard.'}
-            </p>
-          </div>
-          <ul className="space-y-2 text-sm text-vibe-muted">
-            {included.map((item) => (
-              <li key={item} className="flex gap-2">
-                <span className="text-emerald-400">✓</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Link href="/login" className="btn-primary px-6 py-3">
-              Create account{trialLabel ? ' & start trial' : ''}
-            </Link>
-            <Link href="/refunds" className="btn-secondary px-6 py-3">
-              Refund &amp; cancellation policy
-            </Link>
-          </div>
-        </article>
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {plans.map((plan) => (
+            <article
+              key={plan.id}
+              className="glass rounded-2xl p-8 space-y-6 border border-vibe-border"
+            >
+              <div className="space-y-1">
+                <p className="text-sm uppercase tracking-wider text-vibe-accent font-medium">
+                  {plan.name}
+                </p>
+                <p className="text-3xl font-bold">{plan.prices.month.label}</p>
+                <p className="text-sm text-vibe-muted">
+                  or {plan.prices.year.label} (save vs monthly)
+                </p>
+                <p className="text-sm text-vibe-muted pt-2">{plan.description}</p>
+              </div>
+              <ul className="space-y-2 text-sm text-vibe-muted">
+                <li className="flex gap-2">
+                  <span className="text-emerald-400">✓</span>
+                  <span>
+                    {plan.webhookLimitMonthly.toLocaleString()} webhooks / month
+                    {plan.overageAllowed ? ' + metered overage' : ''}
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-emerald-400">✓</span>
+                  <span>
+                    {plan.seatLimit} team seat{plan.seatLimit === 1 ? '' : 's'}
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-emerald-400">✓</span>
+                  <span>All notification channels & platform connectors</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-emerald-400">✓</span>
+                  <span>Customer Portal, invoices, upgrade/downgrade</span>
+                </li>
+              </ul>
+              <Link href="/login" className="btn-primary px-6 py-3 w-full sm:w-auto inline-flex">
+                {trialLabel ? 'Start free trial' : 'Get started'}
+              </Link>
+            </article>
+          ))}
+        </div>
 
         <AudienceProblems compact showSecondary={false} />
 
         <div className="text-sm text-vibe-muted space-y-2 max-w-3xl mx-auto">
           <p>
-            Questions about billing? Email{' '}
+            Promo codes are entered at Stripe Checkout. Manage payment methods, invoices, and
+            cancellations anytime from the dashboard Customer Portal.
+          </p>
+          <p>
+            Questions? Email{' '}
             <a href={`mailto:${supportEmail}`} className="text-vibe-accent hover:underline">
               {supportEmail}
             </a>{' '}
             or visit our <Link href="/contact">contact page</Link>.
-          </p>
-          <p>
-            Promotional pricing, if offered, will always show the discounted price at checkout and in your Stripe
-            receipt. Standard terms apply unless stated otherwise on the promotion.
           </p>
         </div>
       </section>
