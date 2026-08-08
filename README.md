@@ -85,7 +85,7 @@ Operational tooling for delivery reliability and ops visibility:
 | Uptime | `GET /api/uptime` — readiness + recorded probe samples |
 | Retry queue | Sync backoff then durable `retrying` rows with exponential backoff |
 | Dead letters | Exhausted deliveries → `notification_dead_letters` |
-| Cron | `GET /api/cron/retries` every 2 minutes (`CRON_SECRET`) |
+| Cron | `GET /api/cron/retries` daily at 04:00 UTC (`CRON_SECRET`; Hobby-compatible) |
 | Errors | Structured JSON logs + optional Sentry (`SENTRY_DSN`) |
 | Admin UI | `/dashboard/admin` for platform operators |
 
