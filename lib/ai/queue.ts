@@ -153,8 +153,10 @@ async function processOneAiJob(job: AiAnalysisJob): Promise<void> {
       userId: job.userId,
       profile: (ctx.profile || {}) as Record<string, unknown>,
       settings: (ctx.settings || {}) as Record<string, unknown>,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      channelConfigs: (ctx.channelConfigs || {}) as any,
+      channelConfigs: (ctx.channelConfigs || {}) as Record<
+        string,
+        { enabled: boolean; config: Record<string, string>; connected_at?: string }
+      >,
       payload: enriched,
       webhookEventId: job.webhookEventId,
     });
@@ -209,8 +211,10 @@ async function deliverWithoutInsights(job: AiAnalysisJob): Promise<void> {
     userId: job.userId,
     profile: (ctx.profile || {}) as Record<string, unknown>,
     settings: (ctx.settings || {}) as Record<string, unknown>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    channelConfigs: (ctx.channelConfigs || {}) as any,
+    channelConfigs: (ctx.channelConfigs || {}) as Record<
+      string,
+      { enabled: boolean; config: Record<string, string>; connected_at?: string }
+    >,
     payload: job.payload,
     webhookEventId: job.webhookEventId,
   });
@@ -231,8 +235,7 @@ export function scheduleAiJobProcessing(jobId: string): void {
   };
 
   try {
-    // Dynamically import to avoid edge/runtime issues in tests
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // Dynamically require to avoid edge/runtime issues in tests
     const nextServer = require('next/server') as { after?: (fn: () => void) => void };
     if (typeof nextServer.after === 'function') {
       nextServer.after(run);

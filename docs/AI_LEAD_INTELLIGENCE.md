@@ -27,7 +27,7 @@ Webhook → validate/spam → enqueue ai_analysis_jobs → HTTP 200 (fast)
 
 - **Queue:** `ai_analysis_jobs` (durable, retry with backoff)
 - **Immediate path:** `next/server` `after()` when available
-- **Backup:** Vercel Cron `GET /api/cron/ai-analysis` daily at 05:00 UTC (`0 5 * * *`, `CRON_SECRET`). Hobby accounts are limited to daily crons; use a tighter schedule on Vercel Pro if you need faster backlog drainage.
+- **Backup:** `GET /api/cron/ai-analysis` (`CRON_SECRET`). Not registered in `vercel.json` on Hobby — call it from an external scheduler, or re-add a Vercel Cron entry after upgrading to Pro.
 - **Providers:** pluggable `LlmProvider` interface in TypeScript (`lib/ai/providers/*`)
 
 ## Customer controls

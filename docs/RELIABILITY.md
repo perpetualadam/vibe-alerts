@@ -17,9 +17,9 @@ Point external uptime monitors at `/api/health/ready` or `/api/uptime?source=upt
 3. **Exponential backoff** — 60s × 2^(n-1), capped at 1 hour (max 5 async attempts).
 4. **Dead letter** — exhausted jobs move to `notification_dead_letters` (`status = 'dead'`).
 
-Cron: Vercel hits `GET /api/cron/retries` daily at 04:00 UTC (`0 4 * * *`) with `Authorization: Bearer $CRON_SECRET`.
+Cron endpoint: `GET /api/cron/retries` with `Authorization: Bearer $CRON_SECRET`.
 
-> **Hobby plan note:** Vercel Hobby only allows once-per-day cron schedules. Frequent retry sweeps (e.g. every few minutes) require Vercel Pro — update `vercel.json` accordingly after upgrading.
+> **Vercel Hobby:** Native Vercel Cron is omitted from `vercel.json` so Hobby deploys succeed. Hit this endpoint from an external scheduler (or add a daily/`*/N` cron in `vercel.json` after upgrading to Vercel Pro). The in-request retry backoff still runs without cron.
 
 ## Error tracking
 
