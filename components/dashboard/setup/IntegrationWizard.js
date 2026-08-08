@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 import WizardChecklist from '@/components/dashboard/setup/WizardChecklist';
+import { CTA_SUBSCRIBE } from '@/lib/marketing/cta';
+import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 
 function CopyField({ label, value, onCopied }) {
   const [copied, setCopied] = useState(false);
@@ -291,7 +292,7 @@ export default function IntegrationWizard({ onToast }) {
                 Your subscription is inactive. You can still copy credentials, but the connection
                 test requires an active plan.{' '}
                 <Link href="/dashboard" className="underline text-vibe-accent">
-                  Subscribe on the dashboard
+                  {CTA_SUBSCRIBE} on the dashboard
                 </Link>
                 .
               </p>

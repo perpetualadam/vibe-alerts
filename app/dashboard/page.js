@@ -7,6 +7,7 @@ import ChannelSettings, {
 } from '@/components/dashboard/ChannelSettings';
 import DashboardShell from '@/components/dashboard/DashboardShell';
 import PlatformIntegrations from '@/components/dashboard/PlatformIntegrations';
+import { CTA_TRIAL } from '@/lib/marketing/cta';
 import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
 
@@ -373,7 +374,7 @@ export default function DashboardPage() {
             href="/dashboard/billing"
             className="px-5 py-2.5 rounded-lg bg-vibe-accent hover:bg-vibe-accent-hover text-white text-sm font-medium transition-colors whitespace-nowrap text-center"
           >
-            {isActive ? 'Open billing' : trialLabel ? 'Start free trial' : 'View plans'}
+            {isActive ? 'Open billing' : trialLabel ? CTA_TRIAL : 'View plans'}
           </Link>
           {isActive && (
             <button

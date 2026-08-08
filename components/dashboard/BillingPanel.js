@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { CTA_SUBSCRIBE, CTA_TRIAL } from '@/lib/marketing/cta';
 import { dashboardMutationHeaders } from '@/lib/security/client-headers';
 
 function formatMoney(cents, currency = 'usd') {
@@ -353,8 +354,8 @@ export default function BillingPanel({ onToast }) {
                     {busy === `checkout-${plan.id}`
                       ? 'Redirecting…'
                       : trialLabel
-                        ? `Start ${trialLabel}`
-                        : 'Subscribe'}
+                        ? CTA_TRIAL
+                        : CTA_SUBSCRIBE}
                   </button>
                 )}
                 {!price?.configured && (

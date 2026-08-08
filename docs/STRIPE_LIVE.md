@@ -102,7 +102,7 @@ Keep existing vars unchanged: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPPORT_EMAIL`
 ## Step 5 — Verify end-to-end
 
 1. Open https://vibe-alerts.com/dashboard (logged in).
-2. Click **Subscribe** — Checkout should show **live** mode (real card, no “Test mode” banner).
+2. Click **Unlock Pro Features** (or **Stop Losing Leads** when a trial is enabled) — Checkout should show **live** mode (real card, no “Test mode” banner).
 3. Complete payment with a real card (or your own card, then cancel in portal).
 4. Dashboard should show subscription **Active**.
 5. Stripe → **Developers → Webhooks** → your endpoint → confirm **200** responses on events.

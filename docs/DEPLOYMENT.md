@@ -86,7 +86,7 @@ See **[STRIPE_LIVE.md](./STRIPE_LIVE.md)** for the full live-mode checklist (pro
 | 26 | Stripe webhook endpoint | `https://yourdomain.com/api/stripe/webhook` |
 | 27 | Stripe events | `checkout.session.completed`, `checkout.session.async_payment_failed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted` |
 | 28 | Customer Portal | Enable in Stripe Dashboard → Settings → Billing → Customer portal |
-| 29 | Test end-to-end | Sign up → **Subscribe** in dashboard → Send Test Alert |
+| 29 | Test end-to-end | Sign up → **Unlock Pro Features** / **Stop Losing Leads** in dashboard → Send Test Alert |
 | 30 | **Stripe website compliance** | Public pages live: `/pricing`, `/contact`, `/terms`, `/privacy`, `/refunds` with support email in footer |
 
 ### Optional — Email & WhatsApp channels (platform operator)

@@ -3,6 +3,7 @@ import JsonLd from '@/components/marketing/JsonLd';
 import MarketingShell from '@/components/marketing/MarketingShell';
 import TrustBadges from '@/components/marketing/TrustBadges';
 import AudienceProblems from '@/components/marketing/AudienceProblems';
+import { CTA_TRIAL } from '@/lib/marketing/cta';
 import { buildHomePageSchemas, getMarketingFaqs, getHowToSteps } from '@/lib/seo/jsonld';
 import { SITE } from '@/lib/seo/site';
 import { getSubscriptionPriceLabel } from '@/lib/legal/site';
@@ -89,7 +90,7 @@ export default function HomePage() {
               <TrustBadges className="justify-center lg:justify-start !gap-2" />
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-1">
                 <Link href="/login" className="btn-primary px-6 py-3 text-base">
-                  {trialLabel ? 'Start your free trial' : 'Create free account'}
+                  {trialLabel ? CTA_TRIAL : 'Create free account'}
                 </Link>
                 <a href="#who-its-for" className="btn-secondary px-6 py-3 text-base">
                   Who it&apos;s for
@@ -225,7 +226,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
               <Link href="/login" className="btn-primary px-8 py-3 text-base">
-                {trialLabel ? 'Start free trial' : 'Create your account'}
+                {trialLabel ? CTA_TRIAL : 'Create your account'}
               </Link>
               <Link href="/pricing" className="btn-secondary px-8 py-3 text-base">
                 View pricing

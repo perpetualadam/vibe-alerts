@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CTA_TRIAL } from '@/lib/marketing/cta';
 import { SITE } from '@/lib/seo/site';
 import { getSubscriptionTrialLabel } from '@/lib/stripe/trial';
 
@@ -37,7 +38,7 @@ export default function MarketingHeader() {
             Sign in
           </Link>
           <Link href="/login" className="btn-primary text-sm ml-1">
-            {trialLabel ? 'Start free trial' : 'Get started'}
+            {trialLabel ? CTA_TRIAL : 'Get started'}
           </Link>
         </nav>
 
@@ -46,7 +47,7 @@ export default function MarketingHeader() {
             Pricing
           </Link>
           <Link href="/login" className="btn-primary text-sm px-3 py-2">
-            {trialLabel ? 'Try free' : 'Start'}
+            {trialLabel ? CTA_TRIAL : 'Start'}
           </Link>
         </div>
       </div>

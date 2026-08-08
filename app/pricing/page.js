@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import MarketingShell from '@/components/marketing/MarketingShell';
 import AudienceProblems from '@/components/marketing/AudienceProblems';
+import { CTA_TRIAL } from '@/lib/marketing/cta';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { getLegalContext } from '@/lib/legal/site';
 import { getPublicPlanCatalog } from '@/lib/stripe/plans';
@@ -70,7 +71,7 @@ export default function PricingPage() {
                 </li>
               </ul>
               <Link href="/login" className="btn-primary px-6 py-3 w-full sm:w-auto inline-flex">
-                {trialLabel ? 'Start free trial' : 'Get started'}
+                {trialLabel ? CTA_TRIAL : 'Get started'}
               </Link>
             </article>
           ))}

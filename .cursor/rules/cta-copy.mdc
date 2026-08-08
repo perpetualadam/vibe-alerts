@@ -1,0 +1,17 @@
+---
+description: Outcome-focused CTA button copy for VibeAlerts
+globs: "**/*.{js,jsx,ts,tsx}"
+alwaysApply: true
+---
+
+# CTA copy
+
+Do not use generic billing CTAs like **Start free trial**, **Start your free trial**, **Try free**, or **Subscribe** on buttons.
+
+Use the shared labels from `lib/marketing/cta.js`:
+
+- Trial / signup primary CTA → `CTA_TRIAL` (`Stop Losing Leads`)
+- Subscribe / activate plan CTA → `CTA_SUBSCRIBE` (`Unlock Pro Features`)
+
+Keep trial/plan details in supporting copy, badges, or pricing text — not in the button label.
+Keep CTAs outcome-focused and product-specific (missed leads / lost revenue), not generic SaaS trial language.
